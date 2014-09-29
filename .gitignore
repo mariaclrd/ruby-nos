@@ -5,3 +5,4 @@ log/*
 Guardfile
 *.yml
 *~
+.idea/*

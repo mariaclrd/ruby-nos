@@ -14,6 +14,7 @@ end
 
 $LOAD_PATH << File.join(File.dirname(__FILE__),'..')
 require 'config/environment'
+include RubyNos
 
 RSpec.configure do |config|
   config.color = true
