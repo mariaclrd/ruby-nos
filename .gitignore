@@ -6,3 +6,4 @@ Guardfile
 *.yml
 *~
 .idea/*
+projectFilesBackup/*

@@ -4,9 +4,11 @@ require 'pry'
 module RubyNos
   class UDPSender
 
-    def initialize
+    attr_accessor :socket
+
+    def initialize port=6600
       @socket = UDPSocket.new
-      @socket.bind(nil, 6600)
+      @socket.bind(nil, port)
     end
 
     def send_message message, host, port
