@@ -1,6 +1,6 @@
 root_path = File.join(File.dirname(__FILE__),'..')
 lib_path = File.join(root_path,'lib')
-app_name = 'ruby-nos'
+app_name = 'ruby_nos'
 # Add all files to Load path
 $LOAD_PATH << root_path
 $LOAD_PATH << lib_path
