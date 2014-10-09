@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe RubyNos::UDPSender do
 
-  subject{UDPSender.new}
+  subject{UDPSender.new(port, host)}
   let(:port) {6600}
   let(:host) {"127.0.0.1"}
   let(:message) {"message"}
@@ -18,7 +18,7 @@ describe RubyNos::UDPSender do
     end
   end
 
-  describe "#send_message" do
+  describe "#send" do
 
     after(:each) do
       subject.socket.close
@@ -26,7 +26,7 @@ describe RubyNos::UDPSender do
 
     it "sends a message to a specified socket" do
       message = "example message"
-      subject.send_message(message, host, port)
+      subject.send(message)
       expect(subject.socket.recvfrom(16).first). to eq(message)
     end
   end
