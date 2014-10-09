@@ -1,20 +1,18 @@
 require 'socket'
-require 'pry'
 
 module RubyNos
   class UDPSender
 
-    attr_accessor :socket, :host, :port
+    attr_accessor :socket, :port
 
-    def initialize port=6600, host
+    def initialize
       @socket = UDPSocket.new
-      @port = port
-      @host = host
-      @socket.bind(nil, @port)
+      @socket.bind("127.0.0.1", 0)
+      @port = Socket.getnameinfo(@socket.getsockname()).last
     end
 
-    def send message
-      @socket.send(message, 0, @host, @port)
+    def send args={}
+      @socket.send(args[:message].to_s, 0, args[:host], args[:port])
     end
   end
 end

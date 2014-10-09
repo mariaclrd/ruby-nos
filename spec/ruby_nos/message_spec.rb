@@ -14,7 +14,7 @@ describe "RubyNos::Message" do
 
   describe "#serialize_message" do
     it "returns the serialized message" do
-      expect(subject.serialize_message.keys).to include(:v, :fr, :ty, :hp, :rx, :dt, :sg)
+      expect(subject.serialize_message.keys).to include(:v, :fr, :to, :ty, :hp, :rx, :dt, :sg)
     end
   end
 end

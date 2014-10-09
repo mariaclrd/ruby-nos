@@ -19,8 +19,9 @@ module RubyNos
     def serialize_message
     {
         v:  @version,
+        ty: @type,
         fr: "ag:#{@from}",
-        ty: "cd:#{@to}",
+        to: "cd:#{@to}",
         hp: @hops,
         rx: @reliable,
         dt: @data,

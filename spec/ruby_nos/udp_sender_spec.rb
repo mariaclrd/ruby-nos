@@ -2,9 +2,8 @@ require "spec_helper"
 
 describe RubyNos::UDPSender do
 
-  subject{UDPSender.new(port, host)}
-  let(:port) {6600}
-  let(:host) {"127.0.0.1"}
+  subject{UDPSender.new}
+  let(:host)    {"127.0.0.1"}
   let(:message) {"message"}
 
   describe "#initialize" do
@@ -13,7 +12,7 @@ describe RubyNos::UDPSender do
     end
 
     it "opens a new UDP socket" do
-      subject.socket.send(message, 0, host, port)
+      subject.socket.send(message, 0, host, subject.port)
       expect( subject.socket.recvfrom(16).first).to eq(message)
     end
   end
@@ -26,7 +25,7 @@ describe RubyNos::UDPSender do
 
     it "sends a message to a specified socket" do
       message = "example message"
-      subject.send(message)
+      subject.send({message:message, host:host, port:subject.port})
       expect(subject.socket.recvfrom(16).first). to eq(message)
     end
   end
