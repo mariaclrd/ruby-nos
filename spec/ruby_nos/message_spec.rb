@@ -14,7 +14,13 @@ describe "RubyNos::Message" do
 
   describe "#serialize_message" do
     it "returns the serialized message" do
-      expect(subject.serialize_message.keys).to include(:v, :fr, :to, :ty, :hp, :rx, :dt, :sg)
+      expect(subject.serialize_message.keys).to include(:v, :fr, :to, :ty, :hp, :sg)
+    end
+  end
+
+  describe "#serialize_with_extra_headers" do
+    it "returns the serialized message" do
+      expect(subject.serialize_with_extra_headers.keys).to include(:v, :fr, :to, :ty, :hp, :rx, :dt, :sg)
     end
   end
 end

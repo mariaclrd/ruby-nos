@@ -12,7 +12,7 @@ module RubyNos
     end
 
     def send args={}
-      @socket.send(args[:message].to_s, 0, args[:host], args[:port])
+      @socket.send(args[:message].to_s, 0, args[:host] || @receptor_address.last, args[:port] || @receptor_addres[1])
     end
 
     def receive

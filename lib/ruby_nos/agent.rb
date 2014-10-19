@@ -19,8 +19,8 @@ module RubyNos
     end
 
     def send_message args={}
-      message = Message.new({from: @uuid, to: @cloud.uuid, type: args[:type]})
-    udp_socket.send({host: args[:host], port: args[:port], message: message.serialize_message})
+      message = Message.new({from: "ag:#{@uuid}", to: args[:to] || "cd:#{@cloud.uuid}", type: args[:type]})
+      udp_socket.send({host: args[:host], port: args[:port], message: message.serialize_message})
     end
 
     def to_hash
