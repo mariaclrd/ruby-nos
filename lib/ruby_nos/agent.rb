@@ -2,9 +2,10 @@ require "securerandom"
 
 module RubyNos
   class Agent
+    include Initializable
     attr_accessor :uuid, :cloud, :udp_socket
 
-    def initialize
+    def uuid
       @uuid ||= SecureRandom.uuid
     end
 
@@ -19,9 +20,14 @@ module RubyNos
 
     def send_message args={}
       message = Message.new({from: @uuid, to: @cloud.uuid, type: args[:type]})
-      udp_socket.send({host: args[:host], port: args[:port], message: message.serialize_message})
+    udp_socket.send({host: args[:host], port: args[:port], message: message.serialize_message})
     end
 
+    def to_hash
+      {
+          agent_uuid: @uuid
+      }
+    end
 
   end
 end
