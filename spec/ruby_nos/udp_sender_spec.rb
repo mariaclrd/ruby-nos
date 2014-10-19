@@ -29,4 +29,16 @@ describe RubyNos::UDPSender do
       expect(subject.socket.recvfrom(16).first). to eq(message)
     end
   end
+
+  describe "#receive" do
+    after(:each) do
+      subject.socket.close
+    end
+
+    it "receives a message" do
+      subject.send({message:message, host:host, port:subject.port})
+      expect(subject.receive).to eq(message)
+      expect(subject.receptor_address.last).to eq(host)
+    end
+  end
 end

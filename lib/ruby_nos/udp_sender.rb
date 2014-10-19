@@ -2,8 +2,8 @@ require 'socket'
 
 module RubyNos
   class UDPSender
-
-    attr_accessor :socket, :port
+    include Initializable
+    attr_accessor :socket, :port, :message, :receptor_address
 
     def initialize
       @socket = UDPSocket.new
@@ -13,6 +13,11 @@ module RubyNos
 
     def send args={}
       @socket.send(args[:message].to_s, 0, args[:host], args[:port])
+    end
+
+    def receive
+      message, @receptor_address = @socket.recvfrom_nonblock(65535)
+      message
     end
   end
 end
