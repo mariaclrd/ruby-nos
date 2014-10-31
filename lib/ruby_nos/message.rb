@@ -15,6 +15,7 @@ module RubyNos
         to: @to,
         hp: @hops     || 1,
         sg: @sig,
+        sq: generate_sequence_number
     }
     end
 
@@ -23,6 +24,10 @@ module RubyNos
        rx: @reliable || false,
        dt: @data,
                               })
+    end
+
+    def generate_sequence_number
+      
     end
   end
 end
