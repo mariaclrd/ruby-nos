@@ -3,18 +3,18 @@ require "json"
 module RubyNos
   class Processor
 
-    attr_accessor :agents_collection
+    attr_accessor :agent
 
-    def agents_collection
-      @agents_collection ||= AgentsCollection.new
+    def agent
+      @agent ||= Agent.new
     end
 
     def process_message message
       message = parsed_message(message)
 
       if message[:ty] == "PIN"
-        if (agents = agents_collection.for_agent_uuid(message[:to]).to_a) != []
-          agents.first.send_message({type: "PON", to: message[:fr]})
+        if ("ag:#{agent.uuid}" == message[:to])
+          agent.send_message({type: "PON", to: message[:fr]})
         end
       end
     end
