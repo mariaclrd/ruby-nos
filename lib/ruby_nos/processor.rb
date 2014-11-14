@@ -1,4 +1,5 @@
 require "json"
+require "digest"
 
 module RubyNos
   class Processor
@@ -10,7 +11,7 @@ module RubyNos
     end
 
     def process_message message
-      message = parsed_message(message)
+      #message = parsed_message(message)
 
       if message[:ty] == "PIN"
         if agent_receptor?(message[:to])
@@ -21,7 +22,7 @@ module RubyNos
           if message[:ty] == "PON"
             update_cloud(message[:fr])
           elsif message[:ty] == "ACK"
-            check_hash(message)
+            check_digest(message)
           elsif message[:ty] == "PRS"
             update_cloud(message)
             extract_info(message)
@@ -31,6 +32,7 @@ module RubyNos
         end
       end
     end
+
 
 
     private
@@ -62,9 +64,11 @@ module RubyNos
       end
     end
 
-
-    def check_hash message
-      nil
+    def check_digest message
+      original_message = message.dup
+      message.delete_if{|k| (k == :sg) || (k == :dt)}
+      digest = Digest::MD5.digest "#{message}"
+      digest == original_message[:dt][:sh]
     end
 
     def extract_info message

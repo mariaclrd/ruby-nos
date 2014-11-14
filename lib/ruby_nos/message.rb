@@ -19,15 +19,39 @@ module RubyNos
     }
     end
 
-    def serialize_with_extra_headers
-      serialize_message.merge({
-       rx: @reliable || false,
-       dt: @data,
-                              })
+    def serialize_with_optional_fields options
+
+      message = serialize_message
+
+      options_hashes = options[:options].map do |option|
+        {option => optional_fields.fetch(option)}
+      end
+
+      options_hashes.each do |hashie|
+        message.merge!(hashie)
+      end
+
+      message
+    end
+
+
+    def calculate_digest
+      message = serialize_message
+      message.delete(:sg)
+      Digest::MD5.digest("#{message}")
+    end
+
+    private
+
+    def optional_fields
+      {
+          rx: @reliable || false,
+          dt: @data
+      }
     end
 
     def generate_sequence_number
-      
+      nil
     end
   end
 end

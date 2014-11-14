@@ -18,9 +18,26 @@ describe "RubyNos::Message" do
     end
   end
 
-  describe "#serialize_with_extra_headers" do
+  describe "#serialize_with_optional_fields" do
     it "returns the serialized message" do
-      expect(subject.serialize_with_extra_headers.keys).to include(:v, :fr, :to, :ty, :hp, :rx, :dt, :sg)
+      expect(subject.serialize_with_optional_fields({:options => [:rx, :dt]}).keys).to include(:v, :fr, :to, :ty, :hp, :rx, :dt, :sg)
+    end
+  end
+
+  describe "#calculate_digest" do
+    let(:message_to_be_digested) do
+      message = subject.serialize_message
+      message.delete(:sg)
+      message
+    end
+
+    it "use Digest::MD5 module" do
+      expect(Digest::MD5).to receive(:digest).with("#{message_to_be_digested}")
+      subject.calculate_digest
+    end
+    
+    it "returns the calculated MD5 digest" do
+      expect(subject.calculate_digest.length).to eq(16)
     end
   end
 end
