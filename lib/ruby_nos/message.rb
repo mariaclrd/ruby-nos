@@ -34,7 +34,6 @@ module RubyNos
       message
     end
 
-
     def calculate_digest
       message = serialize_message
       message.delete(:sg)
