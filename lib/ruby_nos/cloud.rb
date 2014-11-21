@@ -2,11 +2,8 @@ require "securerandom"
 
 module RubyNos
   class Cloud
+    include Initializable
     attr_accessor :uuid, :agents_list
-
-    def initialize uuid
-      @uuid ||= uuid
-    end
 
     def agents_list
       @agents_list ||= []

@@ -1,7 +1,7 @@
 require "spec_helper"
 
 describe "#RubyNos::Cloud" do
-  subject{Cloud.new(cloud_uuid)}
+  subject{Cloud.new(uuid:cloud_uuid)}
   let(:cloud_uuid) {"122445"}
 
   describe "#join" do
