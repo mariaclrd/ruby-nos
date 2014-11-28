@@ -11,7 +11,7 @@ module RubyNos
     end
 
     def udp_socket
-      @udp_socket ||= UDPSender.new(port: @port)
+      @udp_socket ||= UDPSender.new
     end
 
     def cloud
@@ -23,8 +23,10 @@ module RubyNos
       check_health
     end
 
-    def join_cloud
-      send_message({type: 'DSC', host: :broadcast, port: :broadcast})
+    def to_hash
+      {
+          agent_uuid: @uuid
+      }
     end
 
     def send_message args={}
@@ -32,10 +34,10 @@ module RubyNos
       udp_socket.send({host: args[:host], port: args[:port], message: message.serialize_message})
     end
 
-    def to_hash
-      {
-          agent_uuid: @uuid
-      }
+    private
+
+    def join_cloud
+      send_message({type: 'DSC', host: :broadcast, port: :broadcast})
     end
 
   end

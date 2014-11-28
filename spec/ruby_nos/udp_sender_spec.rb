@@ -4,41 +4,32 @@ describe RubyNos::UDPSender do
 
   subject{UDPSender.new}
   let(:host)    {"127.0.0.1"}
-  let(:message) {"message"}
-
-  describe "#initialize" do
-    after(:each) do
-      subject.socket.close
-    end
-
-    it "opens a new UDP socket" do
-      subject.socket.send(message, 0, host, subject.port)
-      expect( subject.socket.recvfrom(16).first).to eq(message)
-    end
-  end
+  let(:port)    {3783}
 
   describe "#send" do
+    let(:message) {"Example message"}
 
-    after(:each) do
-      subject.socket.close
-    end
+    context "multicast address by default" do
+      let(:host)      {"224.0.0.1"}
+      let(:bind_addr) {"0.0.0.0"}
+      let(:port)       {3783}
+      let(:socketrx)    {UDPSocket.new}
 
-    it "sends a message to a specified socket" do
-      message = "example message"
-      subject.send({message:message, host:host, port:subject.port})
-      expect(subject.socket.recvfrom(16).first). to eq(message)
-    end
-  end
+      before(:each) do
+        membership = IPAddr.new(host).hton + IPAddr.new(bind_addr).hton
+        socketrx.setsockopt(:IPPROTO_IP, :IP_ADD_MEMBERSHIP, membership)
+        socketrx.setsockopt(:SOL_SOCKET, :SO_REUSEPORT, 1)
+        socketrx.bind(bind_addr, port)
+      end
 
-  describe "#receive" do
-    after(:each) do
-      subject.socket.close
-    end
+      after(:each) do
+        socketrx.close
+      end
 
-    it "receives a message" do
-      subject.send({message:message, host:host, port:subject.port})
-      expect(subject.receive).to eq(message)
-      expect(subject.receptor_address.last).to eq(host)
+      it "sends to group address by default" do
+        subject.send({message:message})
+        expect(socketrx.recvfrom(16).first). to eq(message)
+      end
     end
   end
 end

@@ -4,10 +4,10 @@ describe "#RubyNos::Agent" do
   subject{Agent.new(cloud_uuid: "2142142")}
   let(:cloud_uuid) {"2142142"}
 
-  xdescribe "#join_cloud" do
+  xdescribe "#configure" do
     it "joins a cloud" do
       expect(Message).to receive(:new).with({from: "ag:#{subject.uuid}", to: "cd:#{subject.cloud.uuid}", type: 'DSC'})
-      subject.join_cloud
+      subject.configure
     end
   end
 
