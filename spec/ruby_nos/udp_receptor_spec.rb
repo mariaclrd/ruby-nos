@@ -17,12 +17,10 @@ describe RubyNos::UDPReceptor do
     end
 
     it "receives a message listening to multicast address" do
-      expect(processor).to receive(:process_message)
       subject.listen(processor)
-      sleep(1)
       socket_tx.setsockopt(:IPPROTO_IP, :IP_MULTICAST_TTL, 1)
       socket_tx.send(message, 0, host, port)
-      sleep(1)
+      wait_for{sleep 1; processor.to_receive(:process_message)}
     end
   end
 end

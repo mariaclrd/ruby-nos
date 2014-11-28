@@ -35,6 +35,8 @@ GEM
     rspec-mocks (3.1.1)
       rspec-support (~> 3.1.0)
     rspec-support (3.1.0)
+    rspec-wait (0.0.3)
+      rspec (>= 2.11, < 3.2)
     slop (3.6.0)
     thread_safe (0.3.4)
     tzinfo (1.2.2)
@@ -49,4 +51,5 @@ DEPENDENCIES
   pry
   rake
   rspec
+  rspec-wait
   ruby_nos!
