@@ -3,7 +3,7 @@ require 'ipaddr'
 
 module RubyNos
   class UDPReceptor
-    #include Initializable
+    include Initializable
     attr_accessor :socket, :port, :receptor_address
 
     MULTICAST_ADDR = "224.0.0.1"
@@ -18,10 +18,6 @@ module RubyNos
 
     def receptor_address
       @receptor_address ||= []
-    end
-
-    def receive
-      @socket.recvfrom(16).first
     end
 
     def listen processor
@@ -43,9 +39,4 @@ module RubyNos
       @socket.bind(BIND_ADDR, PORT)
     end
   end
-end
-
-if __FILE__ == $0
-  receptor = RubyNos::UDPReceptor.new
-  receptor.listen.join
 end

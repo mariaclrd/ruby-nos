@@ -9,7 +9,8 @@ describe RubyNos::UDPReceptor do
     let(:message) {"Example message"}
     let(:host)    {"224.0.0.1"}
     let(:port)    {3783}
-    let(:processor) {Processor.new}
+    let(:agent)     {Agent.new(:uuid => "12345")}
+    let(:processor) {Processor.new(agent)}
 
     after(:each) do
       subject.socket.close
