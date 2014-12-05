@@ -6,8 +6,8 @@ module RubyNos
 
     attr_accessor :agent
 
-    def agent
-      @agent ||= Agent.new
+    def initialize agent
+      @agent = agent
     end
 
     def process_message message
@@ -24,7 +24,7 @@ module RubyNos
           elsif message[:ty] == "ACK"
             check_digest(message)
           elsif message[:ty] == "PRS"
-            update_cloud(message)
+            update_cloud(message[:fr])
             extract_info(message)
           elsif message[:ty] == "DSC"
             send_response "PRS"
@@ -33,14 +33,12 @@ module RubyNos
       end
     end
 
-
-
     private
 
-    def parsed_message message
-      parsed_message = JSON.parse(message)
-      parsed_message.inject({}){|pair,(k,v)| pair[k.to_sym] = v; pair}
-    end
+    #def parsed_message message
+      #parsed_message = JSON.parse(message)
+      #parsed_message.inject({}){|pair,(k,v)| pair[k.to_sym] = v; pair}
+    #end
 
     def agent_receptor? to_param
       "ag:#{agent.uuid}" == to_param
@@ -59,7 +57,7 @@ module RubyNos
     end
 
     def update_cloud from_param
-      unless (agent.cloud.agents_list.select{|agent| "ag:#{agent}" == from_param}).any?
+      unless (agent.cloud.is_on_the_list?(get_from_uuid(from_param)))
         agent.cloud.add_agent get_from_uuid(from_param)
       end
     end
@@ -72,7 +70,7 @@ module RubyNos
     end
 
     def extract_info message
-      nil
+      agent.cloud.store_info(message)
     end
   end
 end
