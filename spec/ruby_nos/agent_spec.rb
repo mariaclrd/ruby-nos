@@ -4,16 +4,15 @@ describe "#RubyNos::Agent" do
   subject{Agent.new(cloud_uuid: "2142142")}
   let(:cloud_uuid) {"2142142"}
 
-  xdescribe "#configure" do
-    it "joins a cloud" do
-      expect(Message).to receive(:new).with({from: "ag:#{subject.uuid}", to: "cd:#{subject.cloud.uuid}", type: 'DSC'})
+  describe "#configure" do
+    it "initialize the UDPReceptor" do
+      expect(subject.udp_rx_socket).to receive(:listen).and_return(an_instance_of(Thread))
       subject.configure
     end
-  end
 
-  describe "#udp_socket" do
-    it "creates a new socket if it hasn't been created before" do
-      expect(subject.udp_socket).to be_an_instance_of(UDPSender)
+    it "joins the cloud" do
+      expect(subject).to receive(:send_message).with({type: "DSC"})
+      subject.configure
     end
   end
 
