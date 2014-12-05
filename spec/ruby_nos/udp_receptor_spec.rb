@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe RubyNos::UDPReceptor do
 
-  subject{UDPReceptor.new}
+  subject{UDPReceptor.new(port)}
 
   describe "#receive" do
     let(:socket_tx) {UDPSocket.open}

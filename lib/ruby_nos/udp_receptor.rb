@@ -4,16 +4,15 @@ require 'ipaddr'
 module RubyNos
   class UDPReceptor
     include Initializable
-    attr_accessor :socket, :port, :receptor_address
+    attr_accessor :socket, :port
 
     MULTICAST_ADDR = "224.0.0.1"
     BIND_ADDR      = "0.0.0.0"
-    PORT           = 3783
 
 
-    def initialize
+    def initialize port
       @socket = UDPSocket.new
-      configure
+      configure(port)
     end
 
     def receptor_address
@@ -32,11 +31,11 @@ module RubyNos
 
     private
 
-    def configure
+    def configure port
       membership = IPAddr.new(MULTICAST_ADDR).hton + IPAddr.new(BIND_ADDR).hton
       @socket.setsockopt(:IPPROTO_IP, :IP_ADD_MEMBERSHIP, membership)
       @socket.setsockopt(:SOL_SOCKET, :SO_REUSEPORT, 1)
-      @socket.bind(BIND_ADDR, PORT)
+      @socket.bind(BIND_ADDR, port)
     end
   end
 end
