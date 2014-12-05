@@ -2,7 +2,7 @@ require 'socket'
 
 module RubyNos
   class UDPSender
-    #include Initializable
+  include Initializable
     attr_accessor :receptor_address
 
     def receptor_address
@@ -23,7 +23,3 @@ module RubyNos
     end
   end
 end
-
-sender = RubyNos::UDPSender.new
-sender.send({message: "Hello", host: "224.0.0.1", port: 3783})
-puts "Message sent"
