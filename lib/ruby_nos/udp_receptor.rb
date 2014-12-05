@@ -4,9 +4,9 @@ require 'ipaddr'
 module RubyNos
   class UDPReceptor
     include Initializable
-    attr_accessor :socket, :port
+    attr_accessor :socket
 
-    MULTICAST_ADDR = "224.0.0.1"
+    MULTICAST_ADDR = "230.31.32.33"
     BIND_ADDR      = "0.0.0.0"
 
 
