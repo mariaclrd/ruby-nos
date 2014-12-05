@@ -4,7 +4,7 @@ require "active_support"
 module RubyNos
   class Agent
     include Initializable
-    attr_accessor :uuid, :cloud, :udp_tx_socket, :udp_rx_socket, :cloud_uuid, :processor
+    attr_accessor :uuid, :cloud, :udp_tx_socket, :udp_rx_socket, :cloud_uuid, :processor, :port
 
     def uuid
       @uuid ||= SecureRandom.uuid
@@ -15,7 +15,7 @@ module RubyNos
     end
 
     def udp_rx_socket
-      @udp_rx_socket ||= UDPReceptor.new
+      @udp_rx_socket ||= UDPReceptor.new(port)
     end
 
     def cloud
