@@ -11,7 +11,7 @@ module RubyNos
     end
 
     def process_message message
-      #message = parsed_message(message)
+      message = parsed_message(message)
 
       if message[:ty] == "PIN"
         if agent_receptor?(message[:to])
@@ -35,10 +35,12 @@ module RubyNos
 
     private
 
-    #def parsed_message message
-      #parsed_message = JSON.parse(message)
-      #parsed_message.inject({}){|pair,(k,v)| pair[k.to_sym] = v; pair}
-    #end
+    def parsed_message message
+      parsed_message = JSON.parse(message)
+      keyed_message = parsed_message.inject({}){|pair,(k,v)| pair[k.to_sym] = v; pair}
+      (keyed_message[:dt] = keyed_message[:dt].inject({}){|pair,(k,v)| pair[k.to_sym] = v; pair}) if keyed_message[:dt]
+      keyed_message
+    end
 
     def agent_receptor? to_param
       "ag:#{agent.uuid}" == to_param
@@ -65,7 +67,7 @@ module RubyNos
     def check_digest message
       original_message = message.dup
       message.delete_if{|k| (k == :sg) || (k == :dt)}
-      digest = Digest::MD5.digest "#{message}"
+      digest = Digest::MD5.hexdigest "#{message}"
       digest == original_message[:dt][:sh]
     end
 

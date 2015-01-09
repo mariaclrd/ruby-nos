@@ -1,4 +1,6 @@
 require "spec_helper"
+require 'ipaddr'
+require 'json'
 
 describe RubyNos::UDPSender do
 
@@ -7,10 +9,10 @@ describe RubyNos::UDPSender do
   let(:port)    {3783}
 
   describe "#send" do
-    let(:message) {"Example message"}
+    let(:message) {{message: Message.new.serialize_message}}
 
     context "multicast address by default" do
-      let(:host)      {"224.0.0.1"}
+      let(:host)      {"230.31.32.33"}
       let(:bind_addr) {"0.0.0.0"}
       let(:port)       {3783}
       let(:socketrx)    {UDPSocket.new}
@@ -27,8 +29,8 @@ describe RubyNos::UDPSender do
       end
 
       it "sends to group address by default" do
-        subject.send({message:message})
-        expect(socketrx.recvfrom(16).first). to eq(message)
+        subject.send(message)
+        expect(socketrx.recvfrom(512).first). to eq(message[:message].to_json)
       end
     end
   end

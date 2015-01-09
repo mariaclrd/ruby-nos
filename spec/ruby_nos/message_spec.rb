@@ -32,12 +32,12 @@ describe "RubyNos::Message" do
     end
 
     it "use Digest::MD5 module" do
-      expect(Digest::MD5).to receive(:digest).with("#{message_to_be_digested}")
+      expect(Digest::MD5).to receive(:hexdigest).with("#{message_to_be_digested}")
       subject.calculate_digest
     end
 
     it "returns the calculated MD5 digest" do
-      expect(subject.calculate_digest.length).to eq(16)
+      expect(subject.calculate_digest.length).to eq(32)
     end
   end
 end
