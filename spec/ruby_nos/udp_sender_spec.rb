@@ -6,7 +6,7 @@ describe RubyNos::UDPSender do
 
   subject{UDPSender.new}
   let(:host)    {"127.0.0.1"}
-  let(:port)    {3783}
+  let(:port)    {3784}
 
   describe "#send" do
     let(:message) {{message: Message.new.serialize_message}}
@@ -14,7 +14,7 @@ describe RubyNos::UDPSender do
     context "multicast address by default" do
       let(:host)      {"230.31.32.33"}
       let(:bind_addr) {"0.0.0.0"}
-      let(:port)       {3783}
+      let(:port)       {3784}
       let(:socketrx)    {UDPSocket.new}
 
       before(:each) do
