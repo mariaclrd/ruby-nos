@@ -20,7 +20,9 @@ module RubyNos
     end
 
     def store_info message
-      agents_info << {:agent_uuid => message[:fr], :endpoints => message[:dt][:ep], :routes => message[:dt][:ru], :application => message[:dt][:ap]}
+      info_to_be_stored = {:agent_uuid => message[:fr]}
+      info_to_be_stored.merge!(extract_data(message[:dt])) if message[:dt]
+      agents_info << {:agent_uuid => message[:fr]}.merge(info_to_be_stored)
     end
 
     def find_for_agent_uuid uuid
@@ -29,6 +31,16 @@ module RubyNos
 
     def find_for_app app_name
       agents_info.select{|e| e[:application] == app_name}.first
+    end
+
+    private
+
+    def extract_data args ={}
+      endpoints = routes = application = {}
+      (endpoints = {:endpoints => args[:ep]}) if args[:ep]
+      (routes = {:routes => args[:ru]}) if args[:ru]
+      (application = {:application => args[:ap]}) if args[:ap]
+      endpoints.merge(routes).merge(application)
     end
   end
 end
