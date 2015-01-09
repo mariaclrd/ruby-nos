@@ -20,7 +20,7 @@ module RubyNos
     private
 
     def multicast_address
-      ['230.31.32.33', 3783]
+      ['230.31.32.33', 3784]
     end
   end
 end
