@@ -31,6 +31,7 @@ describe RubyNos::UDPSender do
       it "sends to group address by default" do
         subject.send(message)
         expect(socketrx.recvfrom(512).first). to eq(message[:message].to_json)
+        sleep 0.1
       end
     end
   end
