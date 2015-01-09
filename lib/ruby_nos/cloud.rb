@@ -22,7 +22,7 @@ module RubyNos
     def store_info message
       info_to_be_stored = {:agent_uuid => message[:fr]}
       info_to_be_stored.merge!(extract_data(message[:dt])) if message[:dt]
-      agents_info << {:agent_uuid => message[:fr]}.merge(info_to_be_stored)
+      agents_info << info_to_be_stored
     end
 
     def find_for_agent_uuid uuid

@@ -19,11 +19,6 @@ describe "#RubyNos::Cloud" do
       expect(subject.agents_info.count).to eq(1)
     end
 
-    it "stores every agent just once" do
-      subject.store_info(message)
-      expect(subject.agents_info.count).to eq(1)
-    end
-
     it "stores extra info if it is present" do
       subject.store_info(message)
       expect(subject.agents_info.first[:application]).to eq("example_app")
