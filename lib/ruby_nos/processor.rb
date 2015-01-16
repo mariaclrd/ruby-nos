@@ -21,8 +21,6 @@ module RubyNos
         if cloud_receptor?(message[:to])
           if message[:ty] == "PON"
             update_cloud(message[:fr])
-          elsif message[:ty] == "ACK"
-            check_digest(message)
           elsif message[:ty] == "PRS"
             update_cloud(message[:fr])
             extract_info(message)
@@ -62,13 +60,6 @@ module RubyNos
       unless (agent.cloud.is_on_the_list?(get_from_uuid(from_param)))
         agent.cloud.add_agent get_from_uuid(from_param)
       end
-    end
-
-    def check_digest message
-      original_message = message.dup
-      message.delete_if{|k| (k == :sg) || (k == :dt)}
-      digest = Digest::MD5.hexdigest "#{message}"
-      digest == original_message[:dt][:sh]
     end
 
     def extract_info message

@@ -40,15 +40,6 @@ describe RubyNos::Processor do
       end
     end
 
-    context "#ACK message arrives" do
-      let(:message_without_digest){Message.new({from: "ag:45678", to: "cd:12345", type: "ACK"})}
-      let(:digest){{sh: message_without_digest.calculate_digest, lg: 'MD5'}}
-      let(:message){Message.new({from: "ag:45678", to: "cd:12345", type: "ACK", data: digest}).serialize_with_optional_fields({:options => [:dt]})}
-      it "check the digest and if the result is correct it returns true" do
-        expect(subject.process_message(json_message)).to eq(true)
-      end
-    end
-
     context "#Presence message arrives" do
       let(:message) {Message.new({type: "PRS", from:"ag:12345", to: "cd:12345", data: {:ap => "example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
       it "store the information of the agent and update the list" do

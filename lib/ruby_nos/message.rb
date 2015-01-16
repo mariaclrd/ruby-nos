@@ -34,12 +34,6 @@ module RubyNos
       message
     end
 
-    def calculate_digest
-      message = serialize_message
-      message.delete(:sg)
-      Digest::MD5.hexdigest("#{message}")
-    end
-
     private
 
     def optional_fields
