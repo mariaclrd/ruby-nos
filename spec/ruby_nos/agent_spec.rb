@@ -25,7 +25,7 @@ describe "#RubyNos::Agent" do
 
     it "sends a message using the UDP Socket" do
       subject.cloud = cloud
-      expect(Message).to receive(:new).with({:from => "ag:#{subject.uuid}", :to => "cd:#{cloud.uuid}", :type => "DSC"}).and_return(message)
+      expect(Message).to receive(:new).with({:from => "ag:#{subject.uuid}", :to => "cd:#{cloud.uuid}", :type => "DSC", :sequence_number => nil}).and_return(message)
       expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
       subject.send_message({:type => "DSC", :port => port, :host => host})
     end

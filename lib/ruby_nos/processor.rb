@@ -15,7 +15,8 @@ module RubyNos
 
       if message[:ty] == "PIN"
         if agent_receptor?(message[:to])
-          send_response "PON"
+          sequence_number = get_sequence_number message[:sq]
+          send_response "PON", sequence_number
         end
       else
         if cloud_receptor?(message[:to])
@@ -25,7 +26,8 @@ module RubyNos
             update_cloud(message[:fr])
             extract_info(message)
           elsif message[:ty] == "DSC"
-            send_response "PRS"
+            sequence_number = get_sequence_number message[:sq]
+            send_response "PRS", sequence_number
           end
         end
       end
@@ -40,6 +42,10 @@ module RubyNos
       keyed_message
     end
 
+    def get_sequence_number sequence_number
+      sequence_number + 1
+    end
+
     def agent_receptor? to_param
       "ag:#{agent.uuid}" == to_param
     end
@@ -52,8 +58,8 @@ module RubyNos
       (from_param.split("") - ["a", "g", ":"]).join()
     end
 
-    def send_response type
-      agent.send_message({type: type})  #is sent to the entire cloud
+    def send_response type, sequence_number
+      agent.send_message({type: type, sequence_number: sequence_number })  #is sent to the entire cloud
     end
 
     def update_cloud from_param

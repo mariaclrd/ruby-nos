@@ -16,9 +16,9 @@ describe RubyNos::Processor do
 
   describe "#process_message" do
     context "PING message arrives" do
-      let(:message){Message.new({from: "ag:45678", to: "ag:12345", type: "PIN"}).serialize_message}
-      it "it sends a PON" do
-        expect(agent).to receive(:send_message).with({:type => "PON"})
+      let(:message){Message.new({from: "ag:45678", to: "ag:12345", type: "PIN", sequence_number: 123456}).serialize_message}
+      it "it sends a PON and increments the sequence number" do
+        expect(agent).to receive(:send_message).with({:type => "PON", sequence_number: 123457})
         subject.process_message(json_message)
       end
     end
@@ -33,9 +33,9 @@ describe RubyNos::Processor do
     end
 
     context "Discovery message arrives" do
-      let(:message){Message.new({from: "ag:45678", to: "cd:12345", type: "DSC"}).serialize_message}
-      it "it sends a PRS" do
-        expect(agent).to receive(:send_message).with({:type => "PRS"})
+      let(:message){Message.new({from: "ag:45678", to: "cd:12345", type: "DSC", sequence_number: 123456}).serialize_message}
+      it "it sends a PRS and increments the sequence number" do
+        expect(agent).to receive(:send_message).with({:type => "PRS", sequence_number: 123457})
         subject.process_message(json_message)
       end
     end

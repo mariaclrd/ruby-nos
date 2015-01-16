@@ -32,7 +32,7 @@ module RubyNos
     end
 
     def send_message args={}
-      message = Message.new({from: "ag:#{uuid}", to: args[:to] || "cd:#{cloud.uuid}", type: args[:type]})
+      message = Message.new({from: "ag:#{uuid}", to: args[:to] || "cd:#{cloud.uuid}", type: args[:type], sequence_number: args[:sequence_number]})
       udp_tx_socket.send({host: args[:host], port: args[:port], message: message.serialize_message})
     end
 
