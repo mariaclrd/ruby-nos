@@ -13,20 +13,22 @@ module RubyNos
     def process_message message
       message = parsed_message(message)
 
-      if message[:ty] == "PIN"
-        if agent_receptor?(message[:to])
-          sequence_number = get_sequence_number_for_response message[:sq]
-          send_response "PON", sequence_number
-        end
-      else
-        if cloud_receptor?(message[:to])
-          if message[:ty] == "PON"
-            agent.cloud.update(get_from_uuid(message[:fr]), message[:dt])
-          elsif message[:ty] == "PRS"
-            agent.cloud.update(get_from_uuid(message[:fr]), message[:dt])
-          elsif message[:ty] == "DSC"
+      unless get_from_uuid(message[:fr]) == agent.uuid
+        if message[:ty] == "PIN"
+          if agent_receptor?(message[:to])
             sequence_number = get_sequence_number_for_response message[:sq]
-            send_response "PRS", sequence_number
+            send_response "PON", sequence_number
+          end
+        else
+          if cloud_receptor?(message[:to])
+            if message[:ty] == "PON"
+              agent.cloud.update(get_from_uuid(message[:fr]), message[:dt])
+            elsif message[:ty] == "PRS"
+              agent.cloud.update(get_from_uuid(message[:fr]), message[:dt])
+            elsif message[:ty] == "DSC"
+              sequence_number = get_sequence_number_for_response message[:sq]
+              send_response "PRS", sequence_number
+            end
           end
         end
       end

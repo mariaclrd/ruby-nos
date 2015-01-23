@@ -3,7 +3,6 @@ require "json"
 
 describe RubyNos::Processor do
   subject{Processor.new(agent)}
-  let(:query)        {double("query", :where => agent)}
   let(:agent)        {Agent.new(:uuid => "12345")}
   let(:json_message) {message.to_json}
   let(:udp_socket)   {double("UDPSocket", :receptor_address => [12345, "localhost"])}
@@ -40,9 +39,9 @@ describe RubyNos::Processor do
     end
 
     context "#Presence message arrives" do
-      let(:message) {Message.new({type: "PRS", from:"ag:12345", to: "cd:12345", data: {:ap => "example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
+      let(:message) {Message.new({type: "PRS", from:"ag:45678", to: "cd:12345", data: {:ap => "example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
       it "store the information of the agent and update the list" do
-        expect(cloud).to receive(:update).with("12345", {:ap => "example_app"})
+        expect(cloud).to receive(:update).with("45678", {:ap => "example_app"})
         subject.process_message(json_message)
       end
     end
