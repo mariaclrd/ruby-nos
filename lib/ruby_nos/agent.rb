@@ -4,18 +4,18 @@ require "active_support"
 module RubyNos
   class Agent
     include Initializable
-    attr_accessor :uuid, :cloud, :udp_tx_socket, :udp_rx_socket, :cloud_uuid, :processor, :port
+    attr_accessor :uuid, :cloud, :udp_tx, :udp_rx, :cloud_uuid, :processor, :port
 
     def uuid
       @uuid ||= SecureRandom.uuid
     end
 
-    def udp_tx_socket
-      @udp_tx_socket ||= UDPSender.new
+    def udp_tx
+      @udp_tx ||= UDPSender.new
     end
 
-    def udp_rx_socket
-      @udp_rx_socket ||= UDPReceptor.new(port)
+    def udp_rx
+      @udp_rx ||= UDPReceptor.new(port)
     end
 
     def cloud
@@ -42,17 +42,17 @@ module RubyNos
         message = Message.new({from: "ag:#{uuid}", to: args[:to] || "cd:#{cloud.uuid}", type: args[:type], sequence_number: args[:sequence_number]}).serialize_message
       end
 
-      udp_tx_socket.send({host: args[:host], port: args[:port], message: message})
+      udp_tx.send({host: args[:host], port: args[:port], message: message})
     end
 
     private
 
     def receptor_info
-      {endpoints: ["UDP,#{udp_rx_socket.socket.connect_address.ip_port},#{udp_rx_socket.socket.connect_address.ip_address}"]}
+      {endpoints: ["UDP,#{udp_rx.socket.connect_address.ip_port},#{udp_rx.socket.connect_address.ip_address}"]}
     end
 
     def listen
-      udp_rx_socket.listen(processor)
+      udp_rx.listen(processor)
     end
 
     def join_cloud

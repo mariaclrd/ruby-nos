@@ -6,7 +6,7 @@ describe "#RubyNos::Agent" do
 
   describe "#configure" do
     it "initialize the UDPReceptor" do
-      expect(subject.udp_rx_socket).to receive(:listen).and_return(an_instance_of(Thread))
+      expect(subject.udp_rx).to receive(:listen).and_return(an_instance_of(Thread))
       subject.configure
     end
 
@@ -41,7 +41,7 @@ describe "#RubyNos::Agent" do
     end
 
     it "add the UDP socket info if it is a presence message" do
-      allow(subject).to receive(:udp_rx_socket).and_return(udp_socket)
+      allow(subject).to receive(:udp_rx).and_return(udp_socket)
       expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => well_formed_message})
       subject.send_message({:type => "PRS", :port => port, :host => host, :sequence_number => 3})
     end

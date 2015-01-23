@@ -10,7 +10,7 @@ describe RubyNos::Processor do
   let(:cloud)        {double("Cloud", :agent_list => [agent.uuid], :uuid => "12345")}
 
   before(:each) do
-    agent.udp_rx_socket = udp_socket
+    agent.udp_rx = udp_socket
     agent.cloud = cloud
   end
 
