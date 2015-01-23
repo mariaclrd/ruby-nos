@@ -23,11 +23,19 @@ describe "#RubyNos::Agent" do
     let(:host) {"127.0.0.1"}
     let(:port) {"6700"}
 
-    it "sends a message using the UDP Socket" do
+    before(:each) do
       subject.cloud = cloud
+    end
+    it "sends a message using the UDP Socket" do
       expect(Message).to receive(:new).with({:from => "ag:#{subject.uuid}", :to => "cd:#{cloud.uuid}", :type => "DSC", :sequence_number => nil}).and_return(message)
       expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
       subject.send_message({:type => "DSC", :port => port, :host => host})
+    end
+
+    it "used the sequence number passed if it appears" do
+      expect(Message).to receive(:new).with({:from => "ag:#{subject.uuid}", :to => "cd:#{cloud.uuid}", :type => "DSC", :sequence_number => 3}).and_return(message)
+      expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
+      subject.send_message({:type => "DSC", :port => port, :host => host, :sequence_number => 3})
     end
   end
 end

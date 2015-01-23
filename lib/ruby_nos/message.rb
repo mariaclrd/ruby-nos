@@ -15,7 +15,7 @@ module RubyNos
         to: @to,
         hp: @hops     || 1,
         sg: @sig,
-        sq: @sequence_number
+        sq: (@sequence_number || generate_new_sequence_number)
     }
     end
 
@@ -41,6 +41,10 @@ module RubyNos
           rx: @reliable || false,
           dt: @data
       }
+    end
+
+    def generate_new_sequence_number
+      Time.now.to_i
     end
   end
 end

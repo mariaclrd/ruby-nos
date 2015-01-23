@@ -16,6 +16,10 @@ describe "RubyNos::Message" do
     it "returns the serialized message" do
       expect(subject.serialize_message.keys).to include(:v, :fr, :to, :ty, :hp, :sg)
     end
+
+    it "generates a sequence number if it is not specified" do
+      expect(subject.serialize_message[:sq]).to eq(Time.now.to_i)
+    end
   end
 
   describe "#serialize_with_optional_fields" do
