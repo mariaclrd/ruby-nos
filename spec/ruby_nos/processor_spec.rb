@@ -24,10 +24,9 @@ describe RubyNos::Processor do
     end
 
     context "PONG messages arrives" do
-      let(:message){Message.new({from: "ag:45678", to: "cd:12345", type: "PON"}).serialize_message}
+      let(:message){Message.new({from: "ag:45678", to: "cd:12345", type: "PON", sequence_number: 1234}).serialize_message}
       it "it updates the cloud list" do
-        expect(cloud).to receive(:is_on_the_list?).with("45678")
-        expect(cloud).to receive(:add_agent).with("45678")
+        expect(cloud).to receive(:update).with("45678", nil)
         subject.process_message(json_message)
       end
     end
@@ -43,9 +42,7 @@ describe RubyNos::Processor do
     context "#Presence message arrives" do
       let(:message) {Message.new({type: "PRS", from:"ag:12345", to: "cd:12345", data: {:ap => "example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
       it "store the information of the agent and update the list" do
-        expect(cloud).to receive(:is_on_the_list?).with("12345")
-        expect(cloud).to receive(:add_agent).with("12345")
-        expect(cloud).to receive(:store_info).with(message)
+        expect(cloud).to receive(:update).with("12345", {:ap => "example_app"})
         subject.process_message(json_message)
       end
     end

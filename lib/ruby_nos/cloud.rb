@@ -1,46 +1,39 @@
 module RubyNos
   class Cloud
     include Initializable
-    attr_accessor :uuid, :agents_list, :agents_info
-
-    def agents_list
-      @agents_list ||= []
-    end
+    attr_accessor :uuid, :agents_info
 
     def agents_info
       @agents_info ||= []
     end
 
-    def add_agent uuid
-      agents_list << uuid
+    def update agent_uuid, info
+      if !is_on_the_list?(agent_uuid)
+        agents_info << {agent_uuid => info}
+      else
+        unless same_info?(find_info_for_agent_uuid(agent_uuid), info)
+          update_info(agent_uuid, info)
+        end
+      end
+    end
+
+    def find_info_for_agent_uuid uuid
+      agents_info.map{|e| e[uuid]}.first
     end
 
     def is_on_the_list? uuid
-      agents_list.include?(uuid)
-    end
-
-    def store_info message
-      info_to_be_stored = {:agent_uuid => message[:fr]}
-      info_to_be_stored.merge!(extract_data(message[:dt])) if message[:dt]
-      agents_info << info_to_be_stored
-    end
-
-    def find_for_agent_uuid uuid
-      agents_info.select{|e| e[:agent_uuid] == uuid}.first
-    end
-
-    def find_for_app app_name
-      agents_info.select{|e| e[:application] == app_name}.first
+      agents_info.map{|e| e.keys}.flatten.include?(uuid)
     end
 
     private
 
-    def extract_data args ={}
-      endpoints = routes = application = {}
-      (endpoints = {:endpoints => args[:ep]}) if args[:ep]
-      (routes = {:routes => args[:ru]}) if args[:ru]
-      (application = {:application => args[:ap]}) if args[:ap]
-      endpoints.merge(routes).merge(application)
+    def same_info? original_info, new_info
+      original_info == new_info
     end
+
+    def update_info uuid, info
+      agents_info.select{|e| e[uuid]}.first[uuid] = info
+    end
+
   end
 end

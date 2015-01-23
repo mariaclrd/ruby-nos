@@ -4,7 +4,7 @@ require "digest"
 module RubyNos
   class Processor
 
-    attr_accessor :agent
+    attr_accessor :agent, :sequence_numbers
 
     def initialize agent
       @agent = agent
@@ -15,18 +15,17 @@ module RubyNos
 
       if message[:ty] == "PIN"
         if agent_receptor?(message[:to])
-          sequence_number = get_sequence_number message[:sq]
+          sequence_number = get_sequence_number_for_response message[:sq]
           send_response "PON", sequence_number
         end
       else
         if cloud_receptor?(message[:to])
           if message[:ty] == "PON"
-            update_cloud(message[:fr])
+            agent.cloud.update(get_from_uuid(message[:fr]), message[:dt])
           elsif message[:ty] == "PRS"
-            update_cloud(message[:fr])
-            extract_info(message)
+            agent.cloud.update(get_from_uuid(message[:fr]), message[:dt])
           elsif message[:ty] == "DSC"
-            sequence_number = get_sequence_number message[:sq]
+            sequence_number = get_sequence_number_for_response message[:sq]
             send_response "PRS", sequence_number
           end
         end
@@ -42,7 +41,7 @@ module RubyNos
       keyed_message
     end
 
-    def get_sequence_number sequence_number
+    def get_sequence_number_for_response sequence_number
       sequence_number + 1
     end
 
@@ -62,14 +61,14 @@ module RubyNos
       agent.send_message({type: type, sequence_number: sequence_number })  #is sent to the entire cloud
     end
 
-    def update_cloud from_param
-      unless (agent.cloud.is_on_the_list?(get_from_uuid(from_param)))
-        agent.cloud.add_agent get_from_uuid(from_param)
-      end
-    end
+    #def update_cloud from_param
+      #unless (agent.cloud.is_on_the_list?(get_from_uuid(from_param)))
+        #agent.cloud.add_agent get_from_uuid(from_param)
+      #end
+    #end
 
-    def extract_info message
-      agent.cloud.store_info(message)
-    end
+    #def extract_info message
+      #agent.cloud.store_info(message)
+    #end
   end
 end

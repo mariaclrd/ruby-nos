@@ -3,49 +3,43 @@ require "spec_helper"
 describe "#RubyNos::Cloud" do
   subject{Cloud.new(uuid:cloud_uuid)}
   let(:cloud_uuid) {"122445"}
+  let(:agent_uuid) {"12345"}
+  let(:info)       {{"endpoints" => "something"}}
 
-  describe "#add_agent" do
-    let(:uuid) {"12345"}
-    it "adds an agent to the agents_list" do
-      subject.add_agent(uuid)
-      expect(subject.agents_list.count).to eq(1)
+  describe "#update" do
+
+    describe "new agent" do
+      it "stores agents information if it is new" do
+        subject.update(agent_uuid, info)
+        expect(subject.agents_info).to eq([{agent_uuid => info}])
+      end
+    end
+
+    describe "old agent" do
+      let(:new_info) {{"endpoints" => "another_thing"}}
+
+      before(:each) do
+        subject.update(agent_uuid, info)
+      end
+
+      it "if the agent exists and the information is not the same it updates to this new information" do
+        subject.update(agent_uuid, new_info)
+        expect(subject.agents_info).to eq([{agent_uuid => new_info}])
+      end
     end
   end
 
-  describe "#store_info" do
-    let(:message) {Message.new({type: "PRS", data: {ap:"example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
-    it "store the information of the message" do
-      subject.store_info(message)
-      expect(subject.agents_info.count).to eq(1)
-    end
-
-    it "stores extra info if it is present" do
-      subject.store_info(message)
-      expect(subject.agents_info.first[:application]).to eq("example_app")
-    end
-  end
-
-  describe "#find_for_app" do
-    let(:message) {Message.new({type: "PRS", from:"ag:12345", data: {ap:"example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
-    it "finds the agent associated to a concrete application" do
-      subject.store_info(message)
-      expect(subject.find_for_app("example_app")[:agent_uuid]).to eq("ag:12345")
-    end
-  end
-
-  describe "#find_for_agent_uuid" do
-    let(:message) {Message.new({type: "PRS", from:"ag:12345", data: {ap:"example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
+  describe "#find_info_for_agent_uuid" do
     it "finds the agent for its uuid" do
-      subject.store_info(message)
-      expect(subject.find_for_agent_uuid("ag:12345")[:agent_uuid]).to eq("ag:12345")
+      subject.update(agent_uuid, info)
+      expect(subject.find_info_for_agent_uuid("12345")).to eq(info)
     end
   end
 
   describe "#is_on_the_list?" do
-    let(:uuid) {"12345"}
     it "says if an agent is on our local list or not" do
-      subject.add_agent(uuid)
-      expect(subject.is_on_the_list?(uuid)).to eq(true)
+      subject.update(agent_uuid, info)
+      expect(subject.is_on_the_list?(agent_uuid)).to eq(true)
     end
   end
 end
