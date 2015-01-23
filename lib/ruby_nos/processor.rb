@@ -58,17 +58,7 @@ module RubyNos
     end
 
     def send_response type, sequence_number
-      agent.send_message({type: type, sequence_number: sequence_number })  #is sent to the entire cloud
+      agent.send_message({type: type, sequence_number: sequence_number })
     end
-
-    #def update_cloud from_param
-      #unless (agent.cloud.is_on_the_list?(get_from_uuid(from_param)))
-        #agent.cloud.add_agent get_from_uuid(from_param)
-      #end
-    #end
-
-    #def extract_info message
-      #agent.cloud.store_info(message)
-    #end
   end
 end
