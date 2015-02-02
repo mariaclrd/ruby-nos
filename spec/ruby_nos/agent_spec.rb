@@ -5,6 +5,12 @@ describe "#RubyNos::Agent" do
   let(:cloud_uuid) {"2142142"}
 
   describe "#configure" do
+    let(:cloud) {Cloud.new(uuid: cloud_uuid)}
+
+    before(:each) do
+      subject.cloud = cloud
+    end
+
     it "initialize the UDPReceptor" do
       expect(subject.udp_rx).to receive(:listen).and_return(an_instance_of(Thread))
       subject.configure
@@ -13,6 +19,14 @@ describe "#RubyNos::Agent" do
     it "joins the cloud" do
       expect(subject).to receive(:send_message).with({type: "DSC"})
       subject.configure
+    end
+
+    it "sends_a_ping_message if there are other agents in the cloud" do
+      cloud.update("12345")
+      expect(subject).to receive(:send_message).with({type: "DSC"})
+      expect(subject).to receive(:send_message).with({type: "PIN", to: "12345"})
+      subject.configure
+      sleep 0.1
     end
   end
 
