@@ -51,4 +51,12 @@ describe "#RubyNos::Cloud" do
       expect(subject.list_of_agents).to eq([agent_uuid])
     end
   end
+
+  describe "#delete_from_cloud" do
+    it "eliminates the agent from cloud list" do
+      subject.update(agent_uuid, info)
+      subject.delete_from_cloud(agent_uuid)
+      expect(subject.agents_info).to eq([])
+    end
+  end
 end

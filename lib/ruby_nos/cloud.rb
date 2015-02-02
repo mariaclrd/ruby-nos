@@ -17,6 +17,10 @@ module RubyNos
       end
     end
 
+    def delete_from_cloud agent_uuid
+      agents_info.delete_if{|e| e.keys.first == agent_uuid}
+    end
+
     def list_of_agents
       agents_info.map{|e| e.keys}.flatten
     end
