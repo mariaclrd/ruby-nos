@@ -1,10 +1,7 @@
-require "securerandom"
-require "active_support"
-
 module RubyNos
   class Agent
     include Initializable
-    attr_accessor :uuid, :cloud, :udp_tx, :udp_rx, :cloud_uuid, :processor, :port
+    attr_accessor :uuid, :cloud, :pending_response_list, :udp_tx, :udp_rx, :cloud_uuid, :processor, :port
 
     def uuid
       @uuid ||= SecureRandom.uuid
@@ -26,6 +23,10 @@ module RubyNos
       @processor ||= Processor.new(self)
     end
 
+    def pending_response_list
+      @pending_response_list ||= ResponsePendingList.new
+    end
+
     def configure
       listen
       join_cloud
@@ -33,17 +34,24 @@ module RubyNos
     end
 
     def send_message args={}
-      udp_tx.send({host: args[:host], port: args[:port], message: build_message(args)})
+      message = build_message(args)
+      udp_tx.send({host: args[:host], port: args[:port], message: message})
+      message
     end
 
-    private
 
     def send_connection_messages
       thread = Thread.new do
         loop do
           unless cloud.list_of_agents.empty?
             cloud.list_of_agents.each do |agent_uuid|
-              send_message({to: agent_uuid, type: "PIN"})
+              if pending_response_list.is_on_the_list?(agent_uuid) && pending_response_list.count(agent_uuid) == 3
+                pending_response_list.eliminate_from_list(agent_uuid)
+                cloud.delete_from_cloud(agent_uuid)
+              else
+                message = send_message({to: agent_uuid, type: "PIN"})
+                pending_response_list.update(agent_uuid, message[:sq])
+              end
             end
           end
           sleep 30
@@ -51,6 +59,8 @@ module RubyNos
       end
       thread
     end
+
+    private
 
     def build_message args
       if args[:type] == "PRS"
