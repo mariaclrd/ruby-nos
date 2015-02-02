@@ -5,7 +5,7 @@ module RubyNos
   class Message
 
     include Initializable
-    attr_accessor :version, :from, :type, :to, :hops, :seq, :reliable, :data, :sig, :rnd, :sequence_number
+    attr_accessor :version, :from, :type, :to, :hops, :reliable, :data, :sig, :rnd, :sequence_number
 
     def serialize_message
     {
