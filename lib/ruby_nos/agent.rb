@@ -35,32 +35,34 @@ module RubyNos
 
     def send_message args={}
       message = build_message(args)
+      puts "#{message[:ty]} sent" if message.class == Hash
       udp_tx.send({host: args[:host], port: args[:port], message: message})
       message
     end
 
+    private
 
     def send_connection_messages
       thread = Thread.new do
         loop do
           unless cloud.list_of_agents.empty?
             cloud.list_of_agents.each do |agent_uuid|
-              if pending_response_list.is_on_the_list?(agent_uuid) && pending_response_list.count(agent_uuid) == 3
+              if pending_response_list.is_on_the_list?(agent_uuid) && pending_response_list.count_for_agent(agent_uuid) == 3
                 pending_response_list.eliminate_from_list(agent_uuid)
-                cloud.delete_from_cloud(agent_uuid)
+                puts "Agent #{agent_uuid} has been deleted from the list"
+                cloud.eliminate_from_list(agent_uuid)
               else
-                message = send_message({to: agent_uuid, type: "PIN"})
+                message = send_message({to: "ag:#{agent_uuid}", type: "PIN"})
                 pending_response_list.update(agent_uuid, message[:sq])
               end
             end
           end
-          sleep 30
+          sleep 10
         end
       end
       thread
     end
 
-    private
 
     def build_message args
       if args[:type] == "PRS"

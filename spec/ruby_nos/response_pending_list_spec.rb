@@ -17,7 +17,7 @@ describe "#RubyNos::ResponsePendingList" do
   describe "#response_pending_info" do
     it "extracts all the info of pending response from the list" do
       subject.update(agent_uuid, sequence_number)
-      expect(subject.response_pending_info(agent_uuid)).to eq(info)
+      expect(subject.info_on_the_list(agent_uuid)).to eq(info)
     end
   end
 

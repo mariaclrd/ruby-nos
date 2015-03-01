@@ -4,6 +4,7 @@ module RubyNos
   autoload :Agent,               "ruby_nos/agent"
   autoload :Cloud,               "ruby_nos/cloud"
   autoload :Initializable,       "initializable"
+  autoload :ListforAgents,       "ruby_nos/list_for_agents"
   autoload :Message,             "ruby_nos/message"
   autoload :Processor,           "ruby_nos/processor"
   autoload :ResponsePendingList, "ruby_nos/response_pending_list"

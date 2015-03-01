@@ -1,12 +1,8 @@
 module RubyNos
-  class ResponsePendingList
+  class ResponsePendingList < ListforAgents
     include Initializable
 
-    attr_accessor :response_pending_list
-
-    def response_pending_list
-      @response_pending_list ||= []
-    end
+    alias response_pending_list list
 
     def update agent_uuid, sequence_number
       if is_on_the_list?(agent_uuid)
@@ -16,19 +12,7 @@ module RubyNos
       end
     end
 
-    def eliminate_from_list uuid
-      response_pending_list.delete_if{|e| e.keys.first == uuid}
-    end
-
-    def response_pending_info uuid
-      response_pending_list.map{|e| e[uuid]}.first
-    end
-
-    def is_on_the_list? uuid
-      response_pending_list.map{|e| e.keys}.flatten.include?(uuid)
-    end
-
-    def count uuid
+    def count_for_agent uuid
       response_pending_list.response_pending_info(uuid)[:count]
     end
 

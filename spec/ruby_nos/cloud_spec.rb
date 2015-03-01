@@ -31,10 +31,10 @@ describe "#RubyNos::Cloud" do
     end
   end
 
-  describe "#find_info_for_agent_uuid" do
+  describe "#info_on_the_list" do
     it "finds the agent for its uuid" do
       subject.update(agent_uuid, info)
-      expect(subject.find_info_for_agent_uuid("12345")).to eq(info_stored)
+      expect(subject.info_on_the_list("12345")).to eq(info_stored)
     end
   end
 
@@ -55,7 +55,7 @@ describe "#RubyNos::Cloud" do
   describe "#delete_from_cloud" do
     it "eliminates the agent from cloud list" do
       subject.update(agent_uuid, info)
-      subject.delete_from_cloud(agent_uuid)
+      subject.eliminate_from_list(agent_uuid)
       expect(subject.agents_info).to eq([])
     end
   end

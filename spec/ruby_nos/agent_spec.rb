@@ -6,6 +6,7 @@ describe "#RubyNos::Agent" do
 
   describe "#configure" do
     let(:cloud) {Cloud.new(uuid: cloud_uuid)}
+    let(:agent_uuid) {"12345"}
 
     before(:each) do
       subject.cloud = cloud
@@ -20,36 +21,28 @@ describe "#RubyNos::Agent" do
       expect(subject).to receive(:send_message).with({type: "DSC"})
       subject.configure
     end
-  end
-
-  describe "send_connection_messages" do
-    let(:cloud) {Cloud.new(uuid: cloud_uuid)}
-    let(:agent_uuid) {"12345"}
-
-    before(:each) do
-      subject.cloud = cloud
-    end
 
     it "sends_a_ping_message if there are other agents in the cloud" do
       cloud.update(agent_uuid)
-      expect(subject).to receive(:send_message).with({type: "PIN", to: "12345"})
-      subject.send_connection_messages
+      expect(subject).to receive(:send_message).with({type: "DSC"})
+      expect(subject).to receive(:send_message).with({type: "PIN", to: "ag:12345"})
+      subject.configure
       sleep 0.1
     end
 
     it "updates the pending response list if there are other agents in the cloud" do
       cloud.update(agent_uuid)
       expect(subject.pending_response_list).to receive(:update).with(agent_uuid, Time.now.to_i)
-      subject.send_connection_messages
+      subject.configure
       sleep 0.1
     end
 
     it "deletes an agent for the cloud if more than 3 messages are been sent without any response" do
       cloud.update(agent_uuid)
       allow_any_instance_of(ResponsePendingList).to receive(:is_on_the_list?).with(agent_uuid).and_return(true)
-      allow_any_instance_of(ResponsePendingList).to receive(:count).with(agent_uuid).and_return(3)
-      expect(subject.cloud).to receive(:delete_from_cloud).with(agent_uuid)
-      subject.send_connection_messages
+      allow_any_instance_of(ResponsePendingList).to receive(:count_for_agent).with(agent_uuid).and_return(3)
+      expect(subject.cloud).to receive(:eliminate_from_list).with(agent_uuid)
+      subject.configure
       sleep 0.1
     end
   end
