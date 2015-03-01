@@ -3,10 +3,11 @@ require "json"
 
 describe RubyNos::Processor do
   subject{Processor.new(agent)}
-  let(:agent)        {Agent.new(:uuid => "12345")}
-  let(:json_message) {message.to_json}
-  let(:udp_socket)   {double("UDPSocket", :receptor_address => [12345, "localhost"])}
-  let(:cloud)        {double("Cloud", :agent_list => [agent.uuid], :uuid => "12345")}
+  let(:agent)                 {Agent.new(:uuid => "12345", pending_response_list: pending_response_list)}
+  let(:pending_response_list) {ResponsePendingList.new}
+  let(:json_message)          {message.to_json}
+  let(:udp_socket)            {double("UDPSocket", :receptor_address => [12345, "localhost"])}
+  let(:cloud)                 {double("Cloud", :agent_list => [agent.uuid], :uuid => "12345")}
 
   before(:each) do
     agent.udp_rx = udp_socket
@@ -25,6 +26,12 @@ describe RubyNos::Processor do
     context "PONG messages arrives" do
       let(:message){Message.new({from: "ag:45678", to: "cd:12345", type: "PON", sequence_number: 1234}).serialize_message}
       it "it updates the cloud list" do
+        expect(cloud).to receive(:update).with("45678", nil)
+        subject.process_message(json_message)
+      end
+
+      it "checks if the message already exists on the pending response list" do
+        expect(pending_response_list).to receive(:is_on_the_list?).with("45678")
         expect(cloud).to receive(:update).with("45678", nil)
         subject.process_message(json_message)
       end
