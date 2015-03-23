@@ -4,7 +4,7 @@ require "digest"
 module RubyNos
   class Processor
 
-    attr_accessor :agent, :sequence_numbers
+    attr_accessor :agent
 
     def initialize agent
       @agent = agent
@@ -53,15 +53,15 @@ module RubyNos
     end
 
     def process_discovery_message message
+      if !agent.cloud.is_on_the_list?(get_from_uuid(message[:fr]))
+        agent.cloud.update(get_from_uuid(message[:fr]), message[:dt])
+      end
       sequence_number = get_sequence_number_for_response message[:sq]
       send_response "PRS", sequence_number
     end
 
     def parsed_message message
-      parsed_message = JSON.parse(message)
-      keyed_message = parsed_message.inject({}){|pair,(k,v)| pair[k.to_sym] = v; pair}
-      (keyed_message[:dt] = keyed_message[:dt].inject({}){|pair,(k,v)| pair[k.to_sym] = v; pair}) if keyed_message[:dt]
-      keyed_message
+      JSON.parse(message, {symbolize_names: true})
     end
 
     def get_sequence_number_for_response sequence_number
@@ -69,24 +69,25 @@ module RubyNos
     end
 
     def check_sequence_number sender_uuid, sequence_number
-      info = agent.pending_response_list.response_pending_info(sender_uuid)
+      puts "SEQUENCE NUMBER RECEIVE: #{sequence_number}"
+      info = agent.pending_response_list.info_on_the_list(sender_uuid)
       if info[:sequence_numbers].include?(sequence_number-1)
         agent.pending_response_list.eliminate_from_list(sender_uuid)
       end
     end
 
     def agent_receptor? to_param
-      "ag:#{agent.uuid}" == to_param
+      "AGT:#{agent.uuid}" == to_param
     end
 
     def cloud_receptor? to_param
-      "cd:#{agent.cloud.uuid}" == to_param
+      "CLD:#{agent.cloud.uuid}" == to_param
     end
 
     def get_from_uuid from_param
-      if from_param.start_with?("ag:", "AG:")
+      if from_param.start_with?("ag:", "AGT:")
         from_array = from_param.split("")
-        for i in 0..2
+        for i in 0..3
           from_array.shift
         end
         from_array.join

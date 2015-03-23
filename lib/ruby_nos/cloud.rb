@@ -6,7 +6,7 @@ module RubyNos
     alias agents_info list
 
     def update agent_uuid, info=""
-      info_to_be_processed = process_info(info)
+      info_to_be_processed = info ?  process_info(info) : {}
       if !is_on_the_list?(agent_uuid)
         agents_info << {agent_uuid => info_to_be_processed}
       else

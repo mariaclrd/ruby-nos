@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'rspec'
-require 'rspec/wait'
 require 'pry'
 
 ENV['RACK_ENV'] = 'test'

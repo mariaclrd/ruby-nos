@@ -4,7 +4,7 @@ module RubyNos
     attr_accessor :uuid, :cloud, :pending_response_list, :udp_tx, :udp_rx, :cloud_uuid, :processor, :port
 
     def uuid
-      @uuid ||= SecureRandom.uuid
+      @uuid ||= SecureRandom.uuid.gsub("-", "")
     end
 
     def udp_tx
@@ -16,7 +16,7 @@ module RubyNos
     end
 
     def cloud
-      @cloud      ||= Cloud.new(uuid: cloud_uuid)
+      @cloud      ||= Cloud.new(uuid: "000000000000006f00000000000000de")
     end
 
     def processor
@@ -35,7 +35,7 @@ module RubyNos
 
     def send_message args={}
       message = build_message(args)
-      puts "#{message[:ty]} sent" if message.class == Hash
+      #puts "#{message[:ty]} sent"
       udp_tx.send({host: args[:host], port: args[:port], message: message})
       message
     end
@@ -43,8 +43,13 @@ module RubyNos
     private
 
     def send_connection_messages
+      begin
       thread = Thread.new do
+        i = 0
         loop do
+          i = i+1
+          puts "Iteration number #{i}"
+          puts "Agents on the cloud #{cloud.list_of_agents.count}"
           unless cloud.list_of_agents.empty?
             cloud.list_of_agents.each do |agent_uuid|
               if pending_response_list.is_on_the_list?(agent_uuid) && pending_response_list.count_for_agent(agent_uuid) == 3
@@ -52,7 +57,7 @@ module RubyNos
                 puts "Agent #{agent_uuid} has been deleted from the list"
                 cloud.eliminate_from_list(agent_uuid)
               else
-                message = send_message({to: "ag:#{agent_uuid}", type: "PIN"})
+                message = send_message({to: "AGT:#{agent_uuid}", type: "PIN"})
                 pending_response_list.update(agent_uuid, message[:sq])
               end
             end
@@ -61,6 +66,9 @@ module RubyNos
         end
       end
       thread
+      rescue Exception => e
+        puts "Error executing the thread #{e.message}"
+      end
     end
 
 
@@ -70,15 +78,15 @@ module RubyNos
       end
 
       if data
-        Message.new({from: "ag:#{uuid}", to: args[:to] || "cd:#{cloud.uuid}", type: args[:type], sequence_number: args[:sequence_number], data: data}).serialize_with_optional_fields({options: [:dt]})
+        Message.new({from: "AGT:#{uuid}", to: args[:to] || "CLD:#{cloud.uuid}", type: args[:type], sequence_number: args[:sequence_number], data: data}).serialize_with_optional_fields({options: [:dt]})
       else
-        Message.new({from: "ag:#{uuid}", to: args[:to] || "cd:#{cloud.uuid}", type: args[:type], sequence_number: args[:sequence_number]}).serialize_message
+        Message.new({from: "AGT:#{uuid}", to: args[:to] || "CLD:#{cloud.uuid}", type: args[:type], sequence_number: args[:sequence_number]}).serialize_message
       end
     end
 
 
     def receptor_info
-      {endpoints: ["UDP,#{udp_rx.socket.connect_address.ip_port},#{udp_rx.socket.connect_address.ip_address}"]}
+      {present: 1, endpoints: ["UDP,#{udp_rx.socket.connect_address.ip_port},#{udp_rx.socket.connect_address.ip_address}"]}
     end
 
     def listen

@@ -4,11 +4,6 @@ require 'json'
 module RubyNos
   class UDPSender
   include Initializable
-    attr_accessor :receptor_address
-
-    def receptor_address
-      @receptor_address ||= []
-    end
 
     def send args={}
       socket = UDPSocket.open

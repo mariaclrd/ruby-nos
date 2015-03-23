@@ -7,7 +7,6 @@ module RubyNos
     attr_accessor :socket
 
     MULTICAST_ADDR = "230.31.32.33"
-    BIND_ADDR      = "0.0.0.0"
 
 
     def initialize port
@@ -32,10 +31,17 @@ module RubyNos
     private
 
     def configure port
-      membership = IPAddr.new(MULTICAST_ADDR).hton + IPAddr.new(BIND_ADDR).hton
+      puts "Binding socket to #{bind_addr} IP"
+      membership = IPAddr.new(MULTICAST_ADDR).hton + IPAddr.new(bind_addr).hton
       @socket.setsockopt(:IPPROTO_IP, :IP_ADD_MEMBERSHIP, membership)
       @socket.setsockopt(:SOL_SOCKET, :SO_REUSEPORT, 1)
-      @socket.bind(BIND_ADDR, port)
+      @socket.setsockopt(:SOL_SOCKET, :SO_REUSEADDR, 1)
+      @socket.bind(bind_addr, port)
+    end
+
+    def bind_addr
+      #Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }.ip_address
+      "0.0.0.0"
     end
   end
 end

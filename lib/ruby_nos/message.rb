@@ -9,13 +9,14 @@ module RubyNos
 
     def serialize_message
     {
-        v:  @version  || "v1.0",
+        v:  @version  || "1.0",
         ty: @type,
         fr: @from,
         to: @to,
-        hp: @hops     || 1,
-        sg: @sig,
-        sq: (@sequence_number || generate_new_sequence_number)
+        rx: 0,
+        hp: @hops     || 2,
+        #sg: @sig,
+        sq: sequence_number
     }
     end
 
@@ -34,6 +35,10 @@ module RubyNos
       message
     end
 
+    def sequence_number
+      @sequence_number || Time.now.to_i
+    end
+
     private
 
     def optional_fields
@@ -41,10 +46,6 @@ module RubyNos
           rx: @reliable || false,
           dt: @data
       }
-    end
-
-    def generate_new_sequence_number
-      Time.now.to_i
     end
   end
 end

@@ -13,7 +13,7 @@ module RubyNos
     end
 
     def count_for_agent uuid
-      response_pending_list.response_pending_info(uuid)[:count]
+      info_on_the_list(uuid)[:count]
     end
 
     private

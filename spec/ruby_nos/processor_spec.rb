@@ -16,7 +16,7 @@ describe RubyNos::Processor do
 
   describe "#process_message" do
     context "PING message arrives" do
-      let(:message){Message.new({from: "ag:45678", to: "ag:12345", type: "PIN", sequence_number: 123456}).serialize_message}
+      let(:message){Message.new({from: "AGT:45678", to: "AGT:12345", type: "PIN", sequence_number: 123456}).serialize_message}
       it "it sends a PON and increments the sequence number" do
         expect(agent).to receive(:send_message).with({:type => "PON", sequence_number: 123457})
         subject.process_message(json_message)
@@ -24,7 +24,7 @@ describe RubyNos::Processor do
     end
 
     context "PONG messages arrives" do
-      let(:message){Message.new({from: "ag:45678", to: "cd:12345", type: "PON", sequence_number: 1234}).serialize_message}
+      let(:message){Message.new({from: "AGT:45678", to: "CLD:12345", type: "PON", sequence_number: 1234}).serialize_message}
       it "it updates the cloud list" do
         expect(cloud).to receive(:update).with("45678", nil)
         subject.process_message(json_message)
@@ -38,15 +38,17 @@ describe RubyNos::Processor do
     end
 
     context "Discovery message arrives" do
-      let(:message){Message.new({from: "ag:45678", to: "cd:12345", type: "DSC", sequence_number: 123456}).serialize_message}
-      it "it sends a PRS and increments the sequence number" do
+      let(:message){Message.new({from: "AGT:45678", to: "CLD:12345", type: "DSC", sequence_number: 123456}).serialize_message}
+      it "it updates the cloud if the user is not on the list and sends a PRS and increments the sequence number" do
+        expect(cloud).to receive(:is_on_the_list?).with("45678")
+        expect(cloud).to receive(:update).with("45678", nil)
         expect(agent).to receive(:send_message).with({:type => "PRS", sequence_number: 123457})
         subject.process_message(json_message)
       end
     end
 
     context "#Presence message arrives" do
-      let(:message) {Message.new({type: "PRS", from:"ag:45678", to: "cd:12345", data: {:ap => "example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
+      let(:message) {Message.new({type: "PRS", from:"AGT:45678", to: "CLD:12345", data: {:ap => "example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
       it "store the information of the agent and update the list" do
         expect(cloud).to receive(:update).with("45678", {:ap => "example_app"})
         subject.process_message(json_message)
