@@ -8,6 +8,7 @@ module RubyNos
   autoload :Message,             "ruby_nos/message"
   autoload :Processor,           "ruby_nos/processor"
   autoload :ResponsePendingList, "ruby_nos/response_pending_list"
+  autoload :Formatter,           "ruby_nos/formatter"
   autoload :UDPReceptor,         "ruby_nos/udp_receptor"
   autoload :UDPSender,           "ruby_nos/udp_sender"
   autoload :VERSION,             "ruby_nos/version"

@@ -6,17 +6,24 @@ module RubyNos
 
     include Initializable
     attr_accessor :version, :from, :type, :to, :hops, :reliable, :data, :sig, :rnd, :sequence_number
+    alias :v= :version=
+    alias :fr= :from=
+    alias :ty= :type=
+    alias :hp= :hops=
+    alias :rx= :reliable=
+    alias :dt= :data=
+    alias :sq= :sequence_number=
+
 
     def serialize_message
     {
-        v:  @version  || "1.0",
-        ty: @type,
-        fr: @from,
-        to: @to,
-        rx: 0,
-        hp: @hops     || 2,
+        v:  self.version  || "1.0",
+        ty: self.type,
+        fr: self.from,
+        to: self.to,
+        hp: self.hops     || 2,
         #sg: @sig,
-        sq: sequence_number
+        sq: self.sequence_number
     }
     end
 
@@ -43,8 +50,8 @@ module RubyNos
 
     def optional_fields
       {
-          rx: @reliable || false,
-          dt: @data
+          rx: self.reliable || false,
+          dt: self.data
       }
     end
   end

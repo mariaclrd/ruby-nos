@@ -24,7 +24,7 @@ describe RubyNos::UDPReceptor do
       socket_tx.setsockopt(:IPPROTO_IP, :IP_MULTICAST_TTL, 1)
       socket_tx.send(message, 0, host, port)
       socket_tx.send(message, 0, host, port)
-      sleep 0.1
+      sleep 0.2
     end
   end
 end
