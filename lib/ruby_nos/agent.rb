@@ -23,10 +23,6 @@ module RubyNos
       @processor ||= Processor.new(self)
     end
 
-    def pending_response_list
-      @pending_response_list ||= ResponsePendingList.new
-    end
-
     def configure
       listen
       join_cloud
@@ -35,7 +31,7 @@ module RubyNos
 
     def send_message args={}
       message = build_message(args)
-      #RubyNos.logger.send(:info, "#{message[:ty]} sent")
+      RubyNos.logger.send(:info, "Message sent: #{message}")
       udp_tx.send({host: args[:host], port: args[:port], message: message})
       message
     end
@@ -52,17 +48,10 @@ module RubyNos
             RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list_of_agents.count}")
             unless cloud.list_of_agents.empty?
               cloud.list_of_agents.each do |agent_uuid|
-                if pending_response_list.is_on_the_list?(agent_uuid) && pending_response_list.count_for_agent(agent_uuid) == 3
-                  pending_response_list.eliminate_from_list(agent_uuid)
-                  RubyNos.logger.send(:info, "Agent #{agent_uuid} has been deleted from the list")
-                  cloud.eliminate_from_list(agent_uuid)
-                else
-                  message = send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"})
-                  pending_response_list.update(agent_uuid, message[:sq])
-                end
+                send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"})
               end
             end
-            sleep 10
+            sleep RubyNos.time_between_messages
           end
         end
         thread
@@ -94,6 +83,7 @@ module RubyNos
     end
 
     def join_cloud
+      send_message({type: 'PRS'})
       send_message({type: 'DSC'})
     end
 

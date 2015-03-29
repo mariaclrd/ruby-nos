@@ -19,30 +19,16 @@ describe "#RubyNos::Agent" do
     end
 
     it "joins the cloud" do
+      expect(subject).to receive(:send_message).with({type: "PRS"})
       expect(subject).to receive(:send_message).with({type: "DSC"})
       subject.configure
     end
 
     it "sends_a_ping_message if there are other agents in the cloud" do
       cloud.update(agent_uuid)
+      expect(subject).to receive(:send_message).with({type: "PRS"})
       expect(subject).to receive(:send_message).with({type: "DSC"})
       expect(subject).to receive(:send_message).with({type: "PIN", to: "AGT:12345"})
-      subject.configure
-      sleep 0.1
-    end
-
-    it "updates the pending response list if there are other agents in the cloud" do
-      cloud.update(agent_uuid)
-      expect(subject.pending_response_list).to receive(:update).with(agent_uuid, Time.now.to_i)
-      subject.configure
-      sleep 0.1
-    end
-
-    it "deletes an agent for the cloud if more than 3 messages are been sent without any response" do
-      cloud.update(agent_uuid)
-      allow_any_instance_of(ResponsePendingList).to receive(:is_on_the_list?).with(agent_uuid).and_return(true)
-      allow_any_instance_of(ResponsePendingList).to receive(:count_for_agent).with(agent_uuid).and_return(3)
-      expect(subject.cloud).to receive(:eliminate_from_list).with(agent_uuid)
       subject.configure
       sleep 0.1
     end
