@@ -5,7 +5,7 @@ module RubyNos
   class Message
 
     include Initializable
-    attr_accessor :version, :from, :type, :to, :hops, :reliable, :data, :sig, :rnd, :sequence_number
+    attr_accessor :version, :from, :type, :to, :hops, :reliable, :data, :signature, :sequence_number
     alias :v= :version=
     alias :fr= :from=
     alias :ty= :type=
@@ -13,18 +13,22 @@ module RubyNos
     alias :rx= :reliable=
     alias :dt= :data=
     alias :sq= :sequence_number=
-
+    alias :sg= :signature=
 
     def serialize_message
-    {
-        v:  self.version  || "1.0",
-        ty: self.type,
-        fr: self.from,
-        to: self.to,
-        hp: self.hops     || 2,
-        #sg: @sig,
-        sq: self.sequence_number
-    }
+      mandatory_fields.merge!({sg: signature_generator.generate_signature(mandatory_fields.to_s)})
+    end
+
+    def mandatory_fields
+      {
+          v:  self.version  || "1.0",
+          ty: self.type,
+          fr: self.from,
+          to: self.to,
+          hp: self.hops     || 2,
+          sq: self.sequence_number
+      }
+
     end
 
     def serialize_with_optional_fields options
@@ -47,6 +51,10 @@ module RubyNos
     end
 
     private
+
+    def signature_generator
+      @signature_generator ||= SignatureGenerator.new
+    end
 
     def optional_fields
       {
