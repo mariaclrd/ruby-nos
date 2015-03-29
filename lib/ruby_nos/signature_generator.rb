@@ -14,7 +14,7 @@ module RubyNos
       OpenSSL::HMAC.hexdigest(digest, key, data)
     end
 
-    def check_signature data, signature
+    def valid_signature? data, signature
       generated_signature = generate_signature(data)
       signature == generated_signature
     end

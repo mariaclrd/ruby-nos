@@ -19,21 +19,9 @@ module RubyNos
       mandatory_fields.merge!({sg: signature_generator.generate_signature(mandatory_fields.to_s)})
     end
 
-    def mandatory_fields
-      {
-          v:  self.version  || "1.0",
-          ty: self.type,
-          fr: self.from,
-          to: self.to,
-          hp: self.hops     || 2,
-          sq: self.sequence_number
-      }
-
-    end
-
     def serialize_with_optional_fields options
 
-      message = serialize_message
+      message = mandatory_fields
 
       options_hashes = options[:options].map do |option|
         {option => optional_fields.fetch(option)}
@@ -43,7 +31,7 @@ module RubyNos
         message.merge!(hashie)
       end
 
-      message
+      message.merge!({sg: signature_generator.generate_signature(message.to_s)})
     end
 
     def sequence_number
@@ -51,6 +39,19 @@ module RubyNos
     end
 
     private
+
+    def mandatory_fields
+      {
+          v:  self.version  || "1.0",
+          ty: self.type,
+          fr: self.from,
+          to: self.to,
+          hp: self.hops     || 2,
+          rx: 0,
+          sq: self.sequence_number
+      }
+
+    end
 
     def signature_generator
       @signature_generator ||= SignatureGenerator.new

@@ -11,10 +11,15 @@ module RubyNos
       @formatter ||= Formatter.new
     end
 
-    def process_message received_message
-      self.current_message = Message.new(formatter.parse_message(received_message))
+    def signature_generator
+      @signature_generator ||= SignatureGenerator.new
+    end
 
-      unless sender_uuid == agent.uuid
+    def process_message received_message
+      formatted_message = formatter.parse_message(received_message)
+      self.current_message = Message.new(formatted_message)
+
+      unless sender_uuid == agent.uuid || !correct_signature?(formatted_message)
         RubyNos.logger.send(:info, "#{self.current_message.type} arrives")
         if current_message.type == "PIN"
           process_pin_message
@@ -42,6 +47,16 @@ module RubyNos
       get_uuid(self.current_message.to)
     end
 
+
+    def correct_signature? received_message
+      if received_message[:sg]
+        signature = received_message.delete(:sg)
+        signature_generator.valid_signature?(received_message.to_s, signature)
+      else
+        true
+      end
+    end
+
     def process_pin_message
       if agent_receptor?
         sequence_number = get_sequence_number_for_response
@@ -50,33 +65,27 @@ module RubyNos
     end
 
     def process_pon_message
-      if agent.pending_response_list.is_on_the_list?(sender_uuid)
-        check_sequence_number
-      end
-      agent.cloud.update(sender_uuid, self.current_message.data)
+      update_cloud
     end
 
     def process_presence_message
-      agent.cloud.update(sender_uuid, self.current_message.data)
+      update_cloud
     end
 
     def process_discovery_message
       if !agent.cloud.is_on_the_list?(sender_uuid)
-        agent.cloud.update(sender_uuid, current_message.data)
+        update_cloud
       end
       sequence_number = get_sequence_number_for_response
       send_response "PRS", sequence_number
     end
 
-    def get_sequence_number_for_response
-      self.current_message.sequence_number + 1
+    def update_cloud
+      agent.cloud.update(sender_uuid, self.current_message.sequence_number, self.current_message.data)
     end
 
-    def check_sequence_number
-      info = agent.pending_response_list.info_on_the_list(sender_uuid)
-      if info[:sequence_numbers].include?(self.current_message.sequence_number-1)
-        agent.pending_response_list.eliminate_from_list(sender_uuid)
-      end
+    def get_sequence_number_for_response
+      self.current_message.sequence_number + 1
     end
 
     def agent_receptor?
