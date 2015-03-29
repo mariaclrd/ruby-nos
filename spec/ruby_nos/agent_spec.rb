@@ -1,11 +1,12 @@
 require "spec_helper"
 
 describe "#RubyNos::Agent" do
-  subject{Agent.new(cloud_uuid: "2142142")}
-  let(:cloud_uuid) {"2142142"}
+  subject{Agent.new}
+  let(:cloud_uuid) {"00000000-0000-006f-0000-0000000000de"}
+  let(:cloud_uuid_in_message) {"000000000000006f00000000000000de"}
 
   describe "#configure" do
-    let(:cloud) {Cloud.new(uuid: "00000000-0000-006f-0000-0000000000de")}
+    let(:cloud) {Cloud.new(uuid: cloud_uuid)}
     let(:agent_uuid) {"12345"}
 
     before(:each) do
@@ -50,8 +51,8 @@ describe "#RubyNos::Agent" do
   describe "#send_message" do
     let(:cloud) {double("Cloud", :uuid => cloud_uuid)}
     let(:message){double("Message", :serialize_message => "SerializedMessage")}
-    let(:udp_socket){UDPReceptor.new(port)}
-    let(:well_formed_message){Message.new({from: "AGT:#{subject.uuid}", to: "CLD:#{subject.cloud.uuid}", type: "PRS", sequence_number: 3, data: {present: 1, endpoints: ["UDP,#{udp_socket.socket.connect_address.ip_port},#{udp_socket.socket.connect_address.ip_address}"]}}).serialize_with_optional_fields({options: [:dt]})}
+    let(:udp_socket){UDPReceptor.new}
+    let(:well_formed_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "PRS", sequence_number: 3, data: {present: 1, endpoints: ["UDP,#{udp_socket.socket.connect_address.ip_port},#{udp_socket.socket.connect_address.ip_address}"]}}).serialize_with_optional_fields({options: [:dt]})}
     let(:host) {"0.0.0.0"}
     let(:port) {"3784"}
 
@@ -60,13 +61,13 @@ describe "#RubyNos::Agent" do
     end
 
     it "sends a message using the UDP Socket" do
-      expect(Message).to receive(:new).with({:from => "AGT:#{subject.uuid}", :to => "CLD:#{cloud.uuid}", :type => "DSC", :sequence_number => nil}).and_return(message)
+      expect(Message).to receive(:new).with({:from => "AGT:#{subject.uuid.gsub("-", "")}", :to => "CLD:#{cloud.uuid.gsub("-", "")}", :type => "DSC", :sequence_number => nil}).and_return(message)
       expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
       subject.send_message({:type => "DSC", :port => port, :host => host})
     end
 
     it "used the sequence number passed if it appears" do
-      expect(Message).to receive(:new).with({:from => "AGT:#{subject.uuid}", :to => "CLD:#{cloud.uuid}", :type => "DSC", :sequence_number => 3}).and_return(message)
+      expect(Message).to receive(:new).with({:from => "AGT:#{subject.uuid.gsub("-", "")}", :to => "CLD:#{cloud.uuid.gsub("-", "")}", :type => "DSC", :sequence_number => 3}).and_return(message)
       expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
       subject.send_message({:type => "DSC", :port => port, :host => host, :sequence_number => 3})
     end
