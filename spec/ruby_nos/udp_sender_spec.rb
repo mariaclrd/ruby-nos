@@ -5,8 +5,6 @@ require 'json'
 describe RubyNos::UDPSender do
 
   subject{UDPSender.new}
-  let(:host)    {"127.0.0.1"}
-  let(:port)    {3784}
 
   describe "#send" do
     let(:message) {{message: Message.new.serialize_message}}

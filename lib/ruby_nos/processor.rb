@@ -15,7 +15,7 @@ module RubyNos
       self.current_message = Message.new(formatter.parse_message(received_message))
 
       unless sender_uuid == agent.uuid
-        puts "#{self.current_message.type} arrives"
+        RubyNos.logger.send(:info, "#{self.current_message.type} arrives")
         if current_message.type == "PIN"
           process_pin_message
         else

@@ -5,6 +5,10 @@ module RubyNos
 
     alias agents_info list
 
+    def uuid
+      @uuid ||= RubyNos.cloud_uuid
+    end
+
     def update agent_uuid, info=""
       info_to_be_processed = info ?  process_info(info) : {}
       if !is_on_the_list?(agent_uuid)

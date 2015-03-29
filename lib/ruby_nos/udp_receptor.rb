@@ -3,19 +3,22 @@ require 'ipaddr'
 
 module RubyNos
   class UDPReceptor
-    include Initializable
-    attr_accessor :socket
+    attr_accessor :port
 
-    MULTICAST_ADDR = "230.31.32.33"
-
-
-    def initialize port
-      @socket = UDPSocket.new
-      configure(port)
+    def initialize
+      configure
     end
 
-    def receptor_address
-      @receptor_address ||= []
+    def port
+      @port ||= RubyNos.port
+    end
+
+    def multicast_address
+      @multicast_address ||= RubyNos.group_address
+    end
+
+    def socket
+      @socket ||= UDPSocket.new
     end
 
     def listen processor
@@ -30,17 +33,16 @@ module RubyNos
 
     private
 
-    def configure port
-      puts "Binding socket to #{bind_addr} IP"
-      membership = IPAddr.new(MULTICAST_ADDR).hton + IPAddr.new(bind_addr).hton
-      @socket.setsockopt(:IPPROTO_IP, :IP_ADD_MEMBERSHIP, membership)
-      @socket.setsockopt(:SOL_SOCKET, :SO_REUSEPORT, 1)
-      @socket.setsockopt(:SOL_SOCKET, :SO_REUSEADDR, 1)
-      @socket.bind(bind_addr, port)
+    def configure
+      RubyNos.logger.send(:info, "Binding socket to #{bind_addr} IP")
+      membership = IPAddr.new(multicast_address).hton + IPAddr.new(bind_addr).hton
+      socket.setsockopt(:IPPROTO_IP, :IP_ADD_MEMBERSHIP, membership)
+      socket.setsockopt(:SOL_SOCKET, :SO_REUSEPORT, 1)
+      socket.setsockopt(:SOL_SOCKET, :SO_REUSEADDR, 1)
+      socket.bind(bind_addr, port)
     end
 
     def bind_addr
-      #Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }.ip_address
       "0.0.0.0"
     end
   end

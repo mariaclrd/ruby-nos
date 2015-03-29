@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe RubyNos::UDPReceptor do
 
-  subject{UDPReceptor.new(port)}
+  subject{UDPReceptor.new}
 
   describe "#receive" do
     let(:socket_tx) {UDPSocket.open}
@@ -24,7 +24,7 @@ describe RubyNos::UDPReceptor do
       socket_tx.setsockopt(:IPPROTO_IP, :IP_MULTICAST_TTL, 1)
       socket_tx.send(message, 0, host, port)
       socket_tx.send(message, 0, host, port)
-      sleep 0.2
+      sleep 10
     end
   end
 end
