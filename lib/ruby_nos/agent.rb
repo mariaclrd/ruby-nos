@@ -1,7 +1,7 @@
 module RubyNos
   class Agent
     include Initializable
-    attr_accessor :uuid, :cloud, :pending_response_list, :udp_tx, :udp_rx,:processor
+    attr_accessor :uuid, :cloud, :pending_response_list, :udp_tx, :udp_rx,:processor, :rest_api
 
     def uuid
       @uuid ||= SecureRandom.uuid
@@ -64,6 +64,8 @@ module RubyNos
     def build_message args
       if args[:type] == "PRS"
         data = receptor_info
+      elsif args[:type] == "QNE"
+        data = rest_api.to_hash if rest_api
       end
 
       if data
@@ -85,6 +87,8 @@ module RubyNos
     def join_cloud
       send_message({type: 'PRS'})
       send_message({type: 'DSC'})
+      send_message({type: 'QNE'}) if rest_api
+      send_message({type: 'ENQ'})
     end
 
     def formatter

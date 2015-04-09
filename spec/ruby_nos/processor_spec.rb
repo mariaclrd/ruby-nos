@@ -61,5 +61,29 @@ describe RubyNos::Processor do
         subject.process_message(json_message)
       end
     end
+
+    context "#Enquiry message arrives" do
+      let(:message) {Message.new({type: "ENQ", from:"AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", sequence_number: sequence_number}).serialize_message}
+      it "returns a QNE message" do
+        expect(agent).to receive(:send_message).with({:type => "QNE", sequence_number: sequence_number + 1})
+        subject.process_message(json_message)
+      end
+    end
+
+    context "#Answer to an enquiry message arrives" do
+      let(:rest_api) {RestApi.new}
+      let(:endpoint_params) {{path: "/example", type: "PUBLIC", port: 5000, host: "localhost"}}
+      let(:message) {Message.new({type: "QNE", from:"AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", sequence_number: sequence_number, data: rest_api.to_hash}).serialize_with_optional_fields({:options => [:dt]})}
+
+      before(:each) do
+        rest_api.add_endpoint(endpoint_params)
+      end
+
+      it "stores the information of the api in the remote agent" do
+        expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
+        expect(cloud).to receive(:insert_new_remote_agent).with(an_instance_of(RemoteAgent))
+        subject.process_message(json_message)
+      end
+    end
   end
 end

@@ -31,6 +31,10 @@ module RubyNos
               process_presence_message
             elsif current_message.type == "DSC"
               process_discovery_message
+            elsif current_message.type == "ENQ"
+              process_enquiry_message
+            elsif current_message.type == "QNE"
+              process_enquiry_answer_message
             end
           end
         end
@@ -47,6 +51,15 @@ module RubyNos
       get_uuid(self.current_message.to)
     end
 
+    def received_api
+      api = RestApi.new({name: self.current_message.data[:name]})
+      if self.current_message.data[:apis]
+        self.current_message.data[:apis].each do |endpoint|
+          api.add_endpoint(endpoint)
+        end
+      end
+      api
+    end
 
     def correct_signature? received_message
       if received_message[:sg]
@@ -59,8 +72,7 @@ module RubyNos
 
     def process_pin_message
       if agent_receptor?
-        sequence_number = get_sequence_number_for_response
-        send_response "PON", sequence_number
+        send_response "PON", get_sequence_number_for_response
       end
     end
 
@@ -76,8 +88,19 @@ module RubyNos
       if !agent.cloud.is_on_the_list?(sender_uuid)
         update_cloud
       end
-      sequence_number = get_sequence_number_for_response
-      send_response "PRS", sequence_number
+      send_response "PRS", get_sequence_number_for_response
+    end
+
+    def process_enquiry_message
+      send_response "QNE", get_sequence_number_for_response
+    end
+
+    def process_enquiry_answer_message
+      if agent.cloud.is_on_the_list?(sender_uuid)
+        agent.cloud.info_on_the_list(sender_uuid).rest_api = received_api
+      else
+        agent.cloud.insert_new_remote_agent(RemoteAgent.new({uuid: sender_uuid, sequence_number: self.current_message.sequence_number, rest_api: received_api}))
+      end
     end
 
     def update_cloud
