@@ -1,7 +1,7 @@
 module RubyNos
   class Cloud < ListforAgents
     include Initializable
-    attr_accessor :uuid, :current_agent_uuid, :current_info, :current_sequence_number
+    attr_accessor :uuid, :current_agent
 
     alias agents_info list
 
@@ -10,21 +10,25 @@ module RubyNos
     end
 
     def update agent_uuid, sequence_number=nil, info=nil
-      self.current_agent_uuid = agent_uuid
-      self.current_info = info ? process_info(info) : {}
-      self.current_sequence_number = sequence_number || nil
+      self.current_agent = RemoteAgent.new(uuid: agent_uuid, sequence_number: (sequence_number || nil))
+      self.current_agent.endpoints = process_endpoints(info[:endpoints]) if (info && info[:endpoints])
 
-      if !is_on_the_list?(self.current_agent_uuid)
+      if !is_on_the_list?(self.current_agent.uuid)
         add_new_agent
       else
         process_existent_agent
       end
     end
 
+    def insert_new_remote_agent agent
+      self.current_agent = agent
+      add_new_agent
+    end
+
     private
 
     def add_new_agent
-      agents_info << {self.current_agent_uuid => info_to_be_stored}
+      agents_info << {self.current_agent.uuid => self.current_agent}
     end
 
     def process_existent_agent
@@ -34,38 +38,30 @@ module RubyNos
     end
 
     def update_actual_info
-      unless (same_info?(info_on_the_list(self.current_agent_uuid), self.current_info) || self.current_info == {})
-        update_info(self.current_agent_uuid, info_to_be_stored)
+      unless (same_info?(info_on_the_list(self.current_agent.uuid).endpoints.map{|e| e.to_hash}, self.current_agent.endpoints.map{|e| e.to_hash}) || self.current_agent.endpoints == [])
+        update_info(self.current_agent.uuid)
       end
     end
 
-    def info_to_be_stored
-      self.current_info.merge(sequence_number: self.current_sequence_number)
-    end
-
     def correct_sequence_number?
-      info_on_the_list(self.current_agent_uuid)[:sequence_number] < self.current_sequence_number
+      info_on_the_list(self.current_agent.uuid).sequence_number < self.current_agent.sequence_number
     end
 
     def same_info? original_info, new_info
       original_info == new_info
     end
 
-    def update_info uuid, info
-      agents_info.select{|e| e[uuid]}.first[uuid] = info
+    def update_info uuid
+      agents_info.select{|e| e[uuid]}.first[uuid] = self.current_agent
     end
 
-    def process_info info
-      info_hash = {}
-
-      if endpoints = info[:endpoints]
-        endpoints_info = []
-        endpoints.each do |endpoint|
-          e_info = endpoint.split(",")
-          endpoints_info << {type: e_info[0], port: e_info[1], address: e_info[2]}
-        end
-        info_hash.merge!({endpoints: endpoints_info})
+    def process_endpoints endpoints
+      endpoints_info = []
+      endpoints.each do |endpoint|
+        e_info = endpoint.split(",")
+        endpoints_info << Endpoint.new({type: e_info[0], port: e_info[1], host: e_info[2]})
       end
+      endpoints_info
     end
   end
 end
