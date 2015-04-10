@@ -53,10 +53,13 @@ module RubyNos
           to: self.to,
           hp: self.hops     || 2,
           rx: 0,
-          ts: (Time.now.to_f*1000).to_i,
+          ts: self.timestamp || generate_miliseconds_timestamp,
           sq: self.sequence_number
       }
+    end
 
+    def generate_miliseconds_timestamp
+      (Time.now.to_f*1000).to_i
     end
 
     def signature_generator
