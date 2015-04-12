@@ -6,11 +6,14 @@ describe RubyNos::UDPReceptor do
 
   describe "#receive" do
     let(:socket_tx) {UDPSocket.open}
-    let(:message) {"Example message"}
-    let(:host)    {"0.0.0.0"}
-    let(:port)    {3784}
-    let(:agent)     {Agent.new(:uuid => "12345")}
-    let(:processor) {Processor.new(agent)}
+    let(:message)   {"Example message"}
+    let(:host)      {"0.0.0.0"}
+    let(:port)      {3784}
+    let(:processor) {double("processor")}
+
+    before(:each) do
+      socket_tx.setsockopt(:IPPROTO_IP, :IP_MULTICAST_TTL, 1)
+    end
 
     after(:each) do
       subject.socket.close
@@ -18,13 +21,11 @@ describe RubyNos::UDPReceptor do
     end
 
     it "receives messages listening to multicast address" do
-      subject.listen(processor)
-      sleep 0.1
-      expect(processor).to receive(:process_message).twice
-      socket_tx.setsockopt(:IPPROTO_IP, :IP_MULTICAST_TTL, 1)
+      allow(processor).to receive(:process_message)
+      expect(processor).to receive(:process_message).and_raise("Boom")
+      thread = subject.listen(processor)
       socket_tx.send(message, 0, host, port)
-      socket_tx.send(message, 0, host, port)
-      sleep 10
+      expect{thread.join}.to raise_error("Boom")
     end
   end
 end

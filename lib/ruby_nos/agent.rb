@@ -31,7 +31,6 @@ module RubyNos
 
     def send_message args={}
       message = build_message(args)
-      RubyNos.logger.send(:info, "Message sent: #{message}")
       udp_tx.send({host: args[:host], port: args[:port], message: message})
       message
     end
