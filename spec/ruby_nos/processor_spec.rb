@@ -17,7 +17,7 @@ describe RubyNos::Processor do
   let(:sequence_number)             {12345}
   let(:basic_message_to_agent)               {{from: "AGT:#{another_agent_uuid_received}", to: "AGT:#{received_agent_uuid}", sequence_number: sequence_number, timestamp: "something"}}
   let(:basic_message_to_cloud)               {{from: "AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", sequence_number: sequence_number, timestamp: "something"}}
-
+  let(:cloud_info) {{agent_uuid: another_agent_uuid, sequence_number: sequence_number, info: nil, timestamp: "something"}}
 
   before(:each) do
     allow_any_instance_of(UDPSender).to receive(:send).and_return(nil)
@@ -43,7 +43,7 @@ describe RubyNos::Processor do
     context "PONG messages arrives" do
       let(:message){Message.new({type: "PON"}.merge(basic_message_to_cloud)).serialize_message}
       it "it updates the cloud list" do
-        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, nil, "something")
+        expect(cloud).to receive(:update).with(cloud_info)
         subject.process_message(json_message)
       end
     end
@@ -52,7 +52,7 @@ describe RubyNos::Processor do
       let(:message){Message.new({type: "DSC"}.merge(basic_message_to_cloud)).serialize_message}
       it "it updates the cloud if the user is not on the list and sends a PRS and increments the sequence number" do
         expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
-        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, nil, "something")
+        expect(cloud).to receive(:update).with(cloud_info)
         expect(agent).to receive(:send_message).with({:type => "PRS", sequence_number: sequence_number + 1})
         subject.process_message(json_message)
       end
@@ -60,8 +60,9 @@ describe RubyNos::Processor do
 
     context "#Presence message arrives" do
       let(:message) {Message.new({type: "PRS", data: {:ap => "example_app"}}.merge(basic_message_to_cloud)).serialize_with_optional_fields({:options => [:dt]})}
+      let(:cloud_info_with_endpoints) {{agent_uuid: another_agent_uuid, sequence_number: sequence_number, info: {:ap => "example_app"}, timestamp: "something"}}
       it "store the information of the agent and update the list" do
-        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, {:ap => "example_app"}, "something")
+        expect(cloud).to receive(:update).with(cloud_info_with_endpoints)
         subject.process_message(json_message)
       end
     end

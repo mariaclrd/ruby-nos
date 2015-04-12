@@ -104,7 +104,7 @@ module RubyNos
     end
 
     def update_cloud
-      agent.cloud.update(sender_uuid, self.current_message.sequence_number, self.current_message.data, self.current_message.timestamp)
+      agent.cloud.update({agent_uuid: sender_uuid, sequence_number: self.current_message.sequence_number, info: self.current_message.data, timestamp: self.current_message.timestamp})
     end
 
     def get_sequence_number_for_response
