@@ -15,21 +15,25 @@ describe RubyNos::Processor do
   let(:another_agent_uuid_received) {another_agent_uuid.gsub("-", "")}
   let(:received_cloud_uuid)         {cloud_uuid.gsub("-", "")}
   let(:sequence_number)             {12345}
+  let(:basic_message_to_agent)               {{from: "AGT:#{another_agent_uuid_received}", to: "AGT:#{received_agent_uuid}", sequence_number: sequence_number, timestamp: "something"}}
+  let(:basic_message_to_cloud)               {{from: "AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", sequence_number: sequence_number, timestamp: "something"}}
+
 
   before(:each) do
+    allow_any_instance_of(UDPSender).to receive(:send).and_return(nil)
     agent.udp_rx = udp_socket
     agent.cloud = cloud
   end
 
   describe "#process_message" do
-    let(:message){Message.new({from: "AGT:#{another_agent_uuid_received}", to: "AGT:#{received_agent_uuid}", type: "PIN", sequence_number: sequence_number}).serialize_message}
+    let(:message){Message.new({type: "PIN"}.merge(basic_message_to_agent)).serialize_message}
     it "checks the signature of the messages" do
       expect_any_instance_of(SignatureGenerator).to receive(:valid_signature?)
       subject.process_message(json_message)
     end
 
     context "PING message arrives" do
-      let(:message){Message.new({from: "AGT:#{another_agent_uuid_received}", to: "AGT:#{received_agent_uuid}", type: "PIN", sequence_number: sequence_number}).serialize_message}
+      let(:message){Message.new({type: "PIN"}.merge(basic_message_to_agent)).serialize_message}
       it "it sends a PON and increments the sequence number" do
         expect(agent).to receive(:send_message).with({:type => "PON", sequence_number: sequence_number + 1})
         subject.process_message(json_message)
@@ -37,33 +41,33 @@ describe RubyNos::Processor do
     end
 
     context "PONG messages arrives" do
-      let(:message){Message.new({from: "AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", type: "PON", sequence_number: sequence_number}).serialize_message}
+      let(:message){Message.new({type: "PON"}.merge(basic_message_to_cloud)).serialize_message}
       it "it updates the cloud list" do
-        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, nil)
+        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, nil, "something")
         subject.process_message(json_message)
       end
     end
 
     context "Discovery message arrives" do
-      let(:message){Message.new({from: "AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", type: "DSC", sequence_number: sequence_number}).serialize_message}
+      let(:message){Message.new({type: "DSC"}.merge(basic_message_to_cloud)).serialize_message}
       it "it updates the cloud if the user is not on the list and sends a PRS and increments the sequence number" do
         expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
-        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, nil)
+        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, nil, "something")
         expect(agent).to receive(:send_message).with({:type => "PRS", sequence_number: sequence_number + 1})
         subject.process_message(json_message)
       end
     end
 
     context "#Presence message arrives" do
-      let(:message) {Message.new({type: "PRS", from:"AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", sequence_number: sequence_number, data: {:ap => "example_app"}}).serialize_with_optional_fields({:options => [:dt]})}
+      let(:message) {Message.new({type: "PRS", data: {:ap => "example_app"}}.merge(basic_message_to_cloud)).serialize_with_optional_fields({:options => [:dt]})}
       it "store the information of the agent and update the list" do
-        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, {:ap => "example_app"})
+        expect(cloud).to receive(:update).with(another_agent_uuid, sequence_number, {:ap => "example_app"}, "something")
         subject.process_message(json_message)
       end
     end
 
     context "#Enquiry message arrives" do
-      let(:message) {Message.new({type: "ENQ", from:"AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", sequence_number: sequence_number}).serialize_message}
+      let(:message) {Message.new({type: "ENQ"}.merge(basic_message_to_cloud)).serialize_message}
       it "returns a QNE message" do
         expect(agent).to receive(:send_message).with({:type => "QNE", sequence_number: sequence_number + 1})
         subject.process_message(json_message)
@@ -73,7 +77,7 @@ describe RubyNos::Processor do
     context "#Answer to an enquiry message arrives" do
       let(:rest_api) {RestApi.new}
       let(:endpoint_params) {{path: "/example", type: "PUBLIC", port: 5000, host: "localhost"}}
-      let(:message) {Message.new({type: "QNE", from:"AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", sequence_number: sequence_number, data: rest_api.to_hash}).serialize_with_optional_fields({:options => [:dt]})}
+      let(:message) {Message.new({type: "QNE", data: rest_api.to_hash}.merge(basic_message_to_cloud)).serialize_with_optional_fields({:options => [:dt]})}
 
       before(:each) do
         rest_api.add_endpoint(endpoint_params)
