@@ -9,8 +9,8 @@ module RubyNos
       @uuid ||= RubyNos.cloud_uuid
     end
 
-    def update agent_uuid, sequence_number=nil, info=nil
-      self.current_agent = RemoteAgent.new(uuid: agent_uuid, sequence_number: (sequence_number || nil))
+    def update agent_uuid, sequence_number=nil, info=nil, timestamp=nil
+      self.current_agent = RemoteAgent.new(uuid: agent_uuid, sequence_number: (sequence_number || nil), timestamp: (timestamp || Time.now))
       self.current_agent.endpoints = process_endpoints(info[:endpoints]) if (info && info[:endpoints])
 
       if !is_on_the_list?(self.current_agent.uuid)
