@@ -14,7 +14,7 @@ describe "RubyNos::Message" do
 
   describe "#serialize_message" do
     it "returns the serialized message" do
-      expect(subject.serialize_message.keys).to include(:v, :fr, :to, :ty, :hp, :sq, :sg)
+      expect(subject.serialize_message.keys).to eq([:v, :ty, :fr, :to, :hp, :rx, :ts, :sq, :sg])
     end
 
     it "generates a sequence number if it is not specified" do
@@ -29,7 +29,7 @@ describe "RubyNos::Message" do
 
   describe "#serialize_with_optional_fields" do
     it "returns the serialized message" do
-      expect(subject.serialize_with_optional_fields({:options => [:rx, :dt]}).keys).to include(:v, :fr, :to, :ty, :hp, :sq, :sg, :rx, :dt)
+      expect(subject.serialize_with_optional_fields({:options => [:rx, :dt]}).keys).to eq([:v, :ty, :fr, :to, :hp, :rx, :ts, :sq, :dt, :sg])
     end
 
     it "adds a signature to each message" do
