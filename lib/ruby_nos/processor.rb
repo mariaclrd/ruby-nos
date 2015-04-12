@@ -25,23 +25,23 @@ module RubyNos
           process_pin_message
         else
           if cloud_receptor?
-            if current_message.type == "PON"
-              process_pon_message
-            elsif current_message.type == "PRS"
-              process_presence_message
-            elsif current_message.type == "DSC"
-              process_discovery_message
-            elsif current_message.type == "ENQ"
-              process_enquiry_message
-            elsif current_message.type == "QNE"
-              process_enquiry_answer_message
-            end
+            message_processor.fetch(current_message.type).call
           end
         end
       end
     end
 
     private
+
+    def message_processor
+      {
+          "PON" => lambda {process_pon_message},
+          "PRS" => lambda {process_presence_message},
+          "DSC" => lambda {process_discovery_message},
+          "ENQ" => lambda {process_enquiry_message},
+          "QNE" => lambda {process_enquiry_answer_message}
+      }
+    end
 
     def sender_uuid
       get_uuid(self.current_message.from)
@@ -104,7 +104,7 @@ module RubyNos
     end
 
     def update_cloud
-      agent.cloud.update(sender_uuid, self.current_message.sequence_number, self.current_message.data)
+      agent.cloud.update(sender_uuid, self.current_message.sequence_number, self.current_message.data, self.current_message.timestamp)
     end
 
     def get_sequence_number_for_response
