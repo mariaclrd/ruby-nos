@@ -71,6 +71,7 @@ module RubyNos
     end
 
     def process_pin_message
+      update_cloud
       if agent_receptor?
         send_response "PON", get_sequence_number_for_response
       end
@@ -92,12 +93,16 @@ module RubyNos
     end
 
     def process_enquiry_message
+      update_cloud
       send_response "QNE", get_sequence_number_for_response
     end
 
     def process_enquiry_answer_message
       if agent.cloud.is_on_the_list?(sender_uuid)
-        agent.cloud.info_on_the_list(sender_uuid).rest_api = received_api
+        remote_agent = agent.cloud.info_on_the_list(sender_uuid)
+        remote_agent.rest_api = received_api
+        remote_agent.timestamp = self.current_message.timestamp
+        agent.cloud.update_info(remote_agent.uuid, remote_agent)
       else
         agent.cloud.insert_new_remote_agent(RemoteAgent.new({uuid: sender_uuid, sequence_number: self.current_message.sequence_number, rest_api: received_api}))
       end

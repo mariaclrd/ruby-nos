@@ -81,6 +81,7 @@ describe RubyNos::Processor do
       let(:rest_api) {RestApi.new}
       let(:endpoint_params) {{path: "/example", type: "PUBLIC", port: 5000, host: "localhost"}}
       let(:message) {Message.new({type: "QNE", data: rest_api.to_hash}.merge(basic_message_to_cloud)).serialize_with_optional_fields({:options => [:dt]})}
+      let(:remote_agent) {RemoteAgent.new(uuid: "12345")}
 
       before(:each) do
         rest_api.add_endpoint(endpoint_params)
@@ -89,6 +90,16 @@ describe RubyNos::Processor do
       it "stores the information of the api in the remote agent" do
         expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
         expect(cloud).to receive(:insert_new_remote_agent).with(an_instance_of(RemoteAgent))
+        subject.process_message(json_message)
+      end
+
+      it "updates the info on the list if the user already exists on the list" do
+        expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
+        expect(cloud).to receive(:insert_new_remote_agent).with(an_instance_of(RemoteAgent))
+        subject.process_message(json_message)
+        expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid).and_return(true)
+        expect(cloud).to receive(:info_on_the_list).with(another_agent_uuid).and_return(remote_agent)
+        expect(cloud).to receive(:update_info).with(remote_agent.uuid, remote_agent)
         subject.process_message(json_message)
       end
     end

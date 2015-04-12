@@ -26,6 +26,11 @@ module RubyNos
       add_new_agent
     end
 
+    def update_info uuid, agent=nil
+      agents_info.select{|e| e[uuid]}.first[uuid] = (agent || self.current_agent)
+    end
+
+
     private
 
     def timestamp_for_list
@@ -73,10 +78,6 @@ module RubyNos
 
     def same_info?
       remote_agent_on_the_list.same_timestamp?(self.current_agent) && remote_agent_on_the_list.same_endpoints?(self.current_agent) && remote_agent_on_the_list.same_api?(self.current_agent)
-    end
-
-    def update_info uuid
-      agents_info.select{|e| e[uuid]}.first[uuid] = self.current_agent
     end
 
     def process_endpoints endpoints
