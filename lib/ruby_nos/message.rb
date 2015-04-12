@@ -51,7 +51,7 @@ module RubyNos
           ty: self.type,
           fr: self.from,
           to: self.to,
-          hp: self.hops     || 2,
+          hp: self.hops     || RubyNos.hops,
           rx: 0,
           ts: self.timestamp || generate_miliseconds_timestamp,
           sq: self.sequence_number

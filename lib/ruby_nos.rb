@@ -20,7 +20,7 @@ module RubyNos
   class << self
     include MiniLogger::Loggable
 
-    attr_accessor :signature_key, :logger, :port, :cloud_uuid, :group_address, :time_between_messages, :keep_alive_time
+    attr_accessor :signature_key, :logger, :port, :cloud_uuid, :group_address, :time_between_messages, :keep_alive_time, :hops
 
     def configure
       if block_given?
@@ -55,6 +55,10 @@ module RubyNos
 
     def keep_alive_time
       @keep_alive_time ||= 60*1000
+    end
+
+    def hops
+      @hops ||= 10
     end
   end
 end
