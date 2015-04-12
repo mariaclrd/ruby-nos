@@ -10,10 +10,9 @@ module RubyNos
     end
 
     def update agent_info
-      self.current_agent = RemoteAgent.new(uuid: agent_info[:agent_uuid], sequence_number: (agent_info[:sequence_number] || nil), timestamp: (agent_info[:timestamp] || Time.now))
+      self.current_agent = RemoteAgent.new(uuid: agent_info[:agent_uuid], sequence_number: (agent_info[:sequence_number] || nil), timestamp: (agent_info[:timestamp] || timestamp_for_list))
       info = agent_info[:info]
       self.current_agent.endpoints = process_endpoints(info[:endpoints]) if (info && info[:endpoints])
-      self.current_agent.rest_api = info[:rest_api] if (info && info[:rest_api])
 
       if !is_on_the_list?(self.current_agent.uuid)
         add_new_agent
@@ -29,19 +28,37 @@ module RubyNos
 
     private
 
+    def timestamp_for_list
+      (Time.now.to_f*1000).to_i
+    end
+
     def add_new_agent
       agents_info << {self.current_agent.uuid => self.current_agent}
     end
 
     def process_existent_agent
-      if correct_sequence_number?
+      if correct_sequence_number? && correct_timestamp?
         update_actual_info
       end
     end
 
+    def remote_agent_on_the_list
+      info_on_the_list(self.current_agent.uuid)
+    end
+
     def update_actual_info
-      unless (same_info?(info_on_the_list(self.current_agent.uuid).endpoints.map{|e| e.to_hash}, self.current_agent.endpoints.map{|e| e.to_hash}) || self.current_agent.endpoints == [])
+      unless same_info?
+        prepare_agent
         update_info(self.current_agent.uuid)
+      end
+    end
+
+    def prepare_agent
+      if self.current_agent.endpoints == []
+        self.current_agent.endpoints = remote_agent_on_the_list.endpoints
+      end
+      if self.current_agent.rest_api == nil
+        self.current_agent.rest_api = remote_agent_on_the_list.rest_api
       end
     end
 
@@ -49,8 +66,13 @@ module RubyNos
       info_on_the_list(self.current_agent.uuid).sequence_number < self.current_agent.sequence_number
     end
 
-    def same_info? original_info, new_info
-      original_info == new_info
+    def correct_timestamp?
+      timestamp = info_on_the_list(self.current_agent.uuid).timestamp
+      (((Time.now - 60).to_f*1000).to_i < timestamp) && (timestamp <= timestamp_for_list)
+    end
+
+    def same_info?
+      remote_agent_on_the_list.same_timestamp?(self.current_agent) && remote_agent_on_the_list.same_endpoints?(self.current_agent) && remote_agent_on_the_list.same_api?(self.current_agent)
     end
 
     def update_info uuid

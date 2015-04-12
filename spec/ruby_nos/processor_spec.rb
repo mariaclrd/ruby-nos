@@ -35,6 +35,7 @@ describe RubyNos::Processor do
     context "PING message arrives" do
       let(:message){Message.new({type: "PIN"}.merge(basic_message_to_agent)).serialize_message}
       it "it sends a PON and increments the sequence number" do
+        expect(cloud).to receive(:update).with(cloud_info)
         expect(agent).to receive(:send_message).with({:type => "PON", sequence_number: sequence_number + 1})
         subject.process_message(json_message)
       end
@@ -70,6 +71,7 @@ describe RubyNos::Processor do
     context "#Enquiry message arrives" do
       let(:message) {Message.new({type: "ENQ"}.merge(basic_message_to_cloud)).serialize_message}
       it "returns a QNE message" do
+        expect(cloud).to receive(:update).with(cloud_info)
         expect(agent).to receive(:send_message).with({:type => "QNE", sequence_number: sequence_number + 1})
         subject.process_message(json_message)
       end

@@ -42,6 +42,19 @@ describe "#RubyNos::Cloud" do
         expect(subject.agents_info.count).to eq(1)
         expect(subject.agents_info.first[agent_uuid].endpoints.first.port).to eq("something")
       end
+
+      it "updates an agent if the timestamp has changed" do
+        allow(subject).to receive(:correct_timestamp?).and_return(true)
+        subject.update({agent_uuid: agent_uuid, sequence_number: new_sequence_number, timestamp: "something"})
+        expect(subject.agents_info.count).to eq(1)
+        expect(subject.agents_info.first[agent_uuid].timestamp).to eq("something")
+      end
+
+      it "not overwrite the information on the list with null information" do
+        subject.update({agent_uuid: agent_uuid, sequence_number: new_sequence_number, info: {endpoints: nil}})
+        expect(subject.agents_info.count).to eq(1)
+        expect(subject.agents_info.first[agent_uuid].endpoints.first.port).to eq("something")
+      end
     end
   end
 

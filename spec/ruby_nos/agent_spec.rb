@@ -34,11 +34,13 @@ describe "#RubyNos::Agent" do
     end
 
     context "#send_connection_messages" do
+
       it "sends_a_ping_message if there are other agents in the cloud" do
         cloud.update({agent_uuid: agent_uuid})
         expect(subject).to receive(:send_message).with({type: "PRS"})
         expect(subject).to receive(:send_message).with({type: "DSC"})
         expect(subject).to receive(:send_message).with({type: "ENQ"})
+        expect(subject).to receive(:last_message_exists?).with(agent_uuid).and_return(true)
         expect(subject).to receive(:send_message).with({type: "PIN", to: "AGT:12345"})
         thread = subject.configure
         sleep 0.1
