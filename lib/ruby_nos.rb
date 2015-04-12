@@ -11,7 +11,6 @@ module RubyNos
   autoload :Message,             "ruby_nos/message"
   autoload :Processor,           "ruby_nos/processor"
   autoload :RemoteAgent,         "ruby_nos/remote_agent"
-  autoload :ResponsePendingList, "ruby_nos/response_pending_list"
   autoload :RestApi,             "ruby_nos/rest_api"
   autoload :SignatureGenerator,  "ruby_nos/signature_generator"
   autoload :UDPReceptor,         "ruby_nos/udp_receptor"

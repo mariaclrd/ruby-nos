@@ -3,8 +3,7 @@ require "json"
 
 describe RubyNos::Processor do
   subject{Processor.new(agent)}
-  let(:agent)                       {Agent.new(:uuid => agent_uuid, pending_response_list: pending_response_list)}
-  let(:pending_response_list)       {ResponsePendingList.new}
+  let(:agent)                       {Agent.new(:uuid => agent_uuid)}
   let(:json_message)                {message.to_json}
   let(:udp_socket)                  {double("UDPSocket", :receptor_address => [12345, "localhost"])}
   let(:cloud)                       {double("Cloud", :agent_list => [agent.uuid], :uuid => cloud_uuid)}
