@@ -47,7 +47,11 @@ module RubyNos
             RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list_of_agents.count}")
             unless cloud.list_of_agents.empty?
               cloud.list_of_agents.each do |agent_uuid|
-                send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"})
+                if last_message_exists?(agent_uuid)
+                  send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"})
+                else
+                  cloud.eliminate_from_list(agent_uuid)
+                end
               end
             end
             sleep RubyNos.time_between_messages
@@ -59,6 +63,10 @@ module RubyNos
       end
     end
 
+    def last_message_exists?(agent_uuid)
+      remote_agent = cloud.info_on_the_list(agent_uuid)
+      (Time.now - remote_agent.timestamp) < RubyNos.keep_alive_time
+    end
 
     def build_message args
       if args[:type] == "PRS"

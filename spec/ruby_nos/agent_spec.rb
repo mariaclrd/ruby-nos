@@ -33,16 +33,31 @@ describe "#RubyNos::Agent" do
       thread.kill
     end
 
-    it "sends_a_ping_message if there are other agents in the cloud" do
-      cloud.update(agent_uuid)
-      expect(subject).to receive(:send_message).with({type: "PRS"})
-      expect(subject).to receive(:send_message).with({type: "DSC"})
-      expect(subject).to receive(:send_message).with({type: "ENQ"})
-      expect(subject).to receive(:send_message).with({type: "PIN", to: "AGT:12345"})
-      thread = subject.configure
-      sleep 0.1
-      thread.kill
+    context "#send_connection_messages" do
+      it "sends_a_ping_message if there are other agents in the cloud" do
+        cloud.update({agent_uuid: agent_uuid})
+        expect(subject).to receive(:send_message).with({type: "PRS"})
+        expect(subject).to receive(:send_message).with({type: "DSC"})
+        expect(subject).to receive(:send_message).with({type: "ENQ"})
+        expect(subject).to receive(:send_message).with({type: "PIN", to: "AGT:12345"})
+        thread = subject.configure
+        sleep 0.1
+        thread.kill
+      end
+
+      it "eliminates an agent from the cloud if there is many time without receiving a new message" do
+        cloud.update({agent_uuid: agent_uuid})
+        expect(subject).to receive(:send_message).with({type: "PRS"})
+        expect(subject).to receive(:send_message).with({type: "DSC"})
+        expect(subject).to receive(:send_message).with({type: "ENQ"})
+        expect(subject).to receive(:last_message_exists?).with(agent_uuid).and_return(false)
+        expect(cloud).to receive(:eliminate_from_list).with(agent_uuid)
+        thread = subject.configure
+        sleep 0.1
+        thread.kill
+      end
     end
+
   end
 
   describe "#send_message" do

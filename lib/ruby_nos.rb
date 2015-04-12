@@ -21,7 +21,7 @@ module RubyNos
   class << self
     include MiniLogger::Loggable
 
-    attr_accessor :signature_key, :logger, :port, :cloud_uuid, :group_address, :time_between_messages
+    attr_accessor :signature_key, :logger, :port, :cloud_uuid, :group_address, :time_between_messages, :keep_alive_time
 
     def configure
       if block_given?
@@ -52,6 +52,10 @@ module RubyNos
 
     def time_between_messages
       @time_between_message ||= 30
+    end
+
+    def keep_alive_time
+      @keep_alive_time ||= 60*1000
     end
   end
 end
