@@ -27,8 +27,6 @@ describe "#RubyNos::Agent" do
 
     it "joins the cloud" do
       expect(subject).to receive(:send_message).with({type: "PRS"})
-      expect(subject).to receive(:send_message).with({type: "DSC"})
-      expect(subject).to receive(:send_message).with({type: "ENQ"})
       thread = subject.configure
       thread.kill
     end

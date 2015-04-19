@@ -45,6 +45,8 @@ module RubyNos
             i = i+1
             RubyNos.logger.send(:info, "Iteration number #{i}")
             RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list_of_agents.count}")
+            send_message({type: 'DSC'})
+            send_message({type: 'ENQ'})
             unless cloud.list_of_agents.empty?
               cloud.list_of_agents.each do |agent_uuid|
                 if last_message_exists?(agent_uuid)
@@ -93,9 +95,7 @@ module RubyNos
 
     def join_cloud
       send_message({type: 'PRS'})
-      send_message({type: 'DSC'})
       send_message({type: 'QNE'}) if rest_api
-      send_message({type: 'ENQ'})
     end
 
     def formatter
