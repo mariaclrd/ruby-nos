@@ -65,6 +65,14 @@ describe RubyNos::Processor do
         expect(cloud).to receive(:update).with(cloud_info_with_endpoints)
         subject.process_message(json_message)
       end
+
+      context "#present equals false" do
+        let(:message) {Message.new({type: "PRS", data: {:ap => "example_app", :present => 0}}.merge(basic_message_to_cloud)).serialize_with_optional_fields({:options => [:dt]})}
+        it "eliminates the agent from the cloud if present field is equal to false" do
+          expect(cloud).to receive(:eliminate_from_list).with(another_agent_uuid)
+          subject.process_message(json_message)
+        end
+      end
     end
 
     context "#Enquiry message arrives" do

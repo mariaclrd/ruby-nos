@@ -21,6 +21,7 @@ module RubyNos
 
       unless sender_uuid == agent.uuid || !correct_signature?(formatted_message)
         RubyNos.logger.send(:info, "#{self.current_message.type} arrives")
+        puts "Message received #{self.current_message}"
         if current_message.type == "PIN"
           process_pin_message
         else
@@ -82,7 +83,11 @@ module RubyNos
     end
 
     def process_presence_message
-      update_cloud
+      if self.current_message.data[:present] == 0
+        agent.cloud.eliminate_from_list(sender_uuid)
+      else
+        update_cloud
+      end
     end
 
     def process_discovery_message
