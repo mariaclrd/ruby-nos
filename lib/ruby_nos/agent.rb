@@ -46,8 +46,8 @@ module RubyNos
           i = 0
           loop do
             i = i+1
-            RubyNos.logger.send(:info, "Iteration number #{i}")
-            RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list_of_agents.count}")
+            puts "Iteration number #{i}"
+            puts "Agents on the cloud #{cloud.list_of_agents.count}"
             send_message({type: 'DSC'})
             send_message({type: 'ENQ'})
             unless cloud.list_of_agents.empty?
@@ -64,7 +64,7 @@ module RubyNos
         end
         thread
       rescue Exception => e
-        RubyNos.logger.send(:info, "Error executing the thread #{e.message}")
+        puts "Error executing the thread #{e.message}"
       end
     end
 
