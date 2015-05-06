@@ -12,11 +12,11 @@ You can configure the following characteristics of the gem:
 Every microservice will have an Agent object that will be the responsible of sending the messages to the cloud. You can
 configure these characteristics:
 
- *Cloud_uuid: The identifier of the cloud where all the microservices will be exchanging messages.
- *Port: UDP port where the Agent will be listening to other microservices messages.
- *Group_address: The IP group where all the microservices will be listening to the messages.
- *Time_between_messages: Allows to specify how much time will pass between the keep alive messages.
- *Hops: Number of hops for the messages.
+ * **Cloud_uuid:** The identifier of the cloud where all the microservices will be exchanging messages.
+ * **Port:** UDP port where the Agent will be listening to other microservices messages.
+ * **Group_address:** The IP group where all the microservices will be listening to the messages.
+ * **Time_between_messages:** Allows to specify how much time will pass between the keep alive messages.
+ * **Hops:** Number of hops for the messages.
 
 An example of configuration would be:
 
@@ -54,9 +54,9 @@ To publish an endpoint you have to add to the rest_api object.
 
 You will have to specify the type of the endpoint, there are three types supported right now:
 
- *PUBLIC(PUB): If the endpoint belongs to a public API.
- *INTERNAL(INT): If the endpoint belongs to an internal API.
- *HEALTHCHECK(HCK): For a healthcheck endpoint.
+ * **PUBLIC(PUB):** If the endpoint belongs to a public API.
+ * **INTERNAL(INT):** If the endpoint belongs to an internal API.
+ * **HEALTHCHECK(HCK):** For a healthcheck endpoint.
 
 
 
