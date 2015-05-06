@@ -36,7 +36,7 @@ To make the agent start sending and listening to messages you will have to add t
       RubyNos::Agent.new.configure
   ```
 
-###Publish API
+###Publish an API
 
 To publish the API of a microservice you will have to create a RestAPI agent and associate it to the Agent.
 
