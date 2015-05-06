@@ -21,7 +21,6 @@ module RubyNos
 
       unless sender_uuid == agent.uuid || !correct_signature?(formatted_message)
         RubyNos.logger.send(:info, "#{self.current_message.type} arrives")
-        puts "Message received #{self.current_message}"
         if current_message.type == "PIN"
           process_pin_message
         else
