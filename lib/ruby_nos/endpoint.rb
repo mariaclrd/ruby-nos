@@ -2,7 +2,12 @@ module RubyNos
   class Endpoint
     include Initializable
     attr_accessor :path, :port, :sticky, :type, :priority, :host
-    ALLOWED_TYPES = ["PUBLIC", "HEALTHCHECK", "INTERNAL", "MSNOS_HTTP", "UDP", "HTTP"]
+    ALLOWED_TYPES = ["PUBLIC", "HEALTHCHECK", "INTERNAL", "MSNOS_HTTP", "UDP", "HTTP", "PUB", "HCK", "INT", "MHT"]
+    alias :pa= :path=
+    alias :po= :port=
+    alias :st= :sticky=
+    alias :ty= :type=
+    alias :xp= :priority=
 
     def type= type
       if ALLOWED_TYPES.include?(type)
@@ -22,11 +27,11 @@ module RubyNos
 
     def to_hash
       {
-          path: self.path,
-          port: self.port,
-          sticky: self.sticky,
-          type: self.type,
-          priority: self.priority,
+          pa: self.path,
+          po: self.port,
+          st: self.sticky,
+          ty: self.type,
+          xp: self.priority,
           host: self.host
       }
     end

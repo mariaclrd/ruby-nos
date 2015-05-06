@@ -24,6 +24,9 @@ module RubyNos
     end
 
     def configure
+       at_exit {
+         send_desconnection_message
+       }
       listen
       join_cloud
       send_connection_messages
@@ -67,11 +70,13 @@ module RubyNos
 
     def last_message_exists?(agent_uuid)
       remote_agent = cloud.info_on_the_list(agent_uuid)
-      (Time.now - remote_agent.timestamp) < RubyNos.keep_alive_time
+      ((Time.now.to_f*1000).to_i - remote_agent.timestamp) < RubyNos.keep_alive_time
     end
 
     def build_message args
-      if args[:type] == "PRS"
+      if args[:data]
+        data = args[:data]
+      elsif args[:type] == "PRS"
         data = receptor_info
       elsif args[:type] == "QNE"
         data = rest_api.to_hash if rest_api
@@ -108,6 +113,10 @@ module RubyNos
       else
         uuid
       end
+    end
+
+    def send_desconnection_message
+      send_message({type: "PRS", data: {present: 0}})
     end
   end
 end

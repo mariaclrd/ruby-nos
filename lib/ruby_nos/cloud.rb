@@ -38,6 +38,7 @@ module RubyNos
     end
 
     def add_new_agent
+      RubyNos.logger.send(:info, "Added agent #{self.current_agent.uuid}")
       agents_info << {self.current_agent.uuid => self.current_agent}
     end
 

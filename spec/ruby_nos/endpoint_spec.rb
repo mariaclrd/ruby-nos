@@ -21,8 +21,8 @@ describe "#RubyNos::Endpoint" do
   describe "#to_hash" do
     it "returns the attributes of the endpoint in a hash" do
       subject.path = "/example_path"
-      expect(subject.to_hash.keys).to eq([:path, :port, :sticky, :type, :priority, :host])
-      expect(subject.to_hash[:path]).to eq("/example_path")
+      expect(subject.to_hash.keys).to eq([:pa, :po, :st, :ty, :xp, :host])
+      expect(subject.to_hash[:pa]).to eq("/example_path")
     end
   end
 end

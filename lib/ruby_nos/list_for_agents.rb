@@ -12,7 +12,7 @@ module RubyNos
     end
 
     def info_on_the_list uuid
-      list.map{|e| e[uuid]}.first
+      list.select{|e| e[uuid]}.first[uuid]
     end
 
     def list_of_agents

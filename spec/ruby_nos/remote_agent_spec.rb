@@ -19,7 +19,7 @@ describe "#RubyNos::RemoteAgent" do
   describe "#endpoints collection" do
     it "shows the endpoints as an array of hashes" do
       subject.add_endpoint({type: "UDP"})
-      expect(subject.endpoints_collection.first.keys).to eq([:path, :port, :sticky, :type, :priority, :host])
+      expect(subject.endpoints_collection.first.keys).to eq([:pa, :po, :st, :ty, :xp, :host])
     end
   end
 

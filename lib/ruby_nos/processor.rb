@@ -21,12 +21,9 @@ module RubyNos
 
       unless sender_uuid == agent.uuid || !correct_signature?(formatted_message)
         RubyNos.logger.send(:info, "#{self.current_message.type} arrives")
-        if current_message.type == "PIN"
-          process_pin_message
-        else
-          if cloud_receptor?
-            message_processor.fetch(current_message.type).call
-          end
+        if agent_receptor? || cloud_receptor?
+          processor = message_processor.fetch(current_message.type, nil)
+          processor.call if processor
         end
       end
     end
@@ -35,6 +32,7 @@ module RubyNos
 
     def message_processor
       {
+          "PIN" => lambda {process_pin_message},
           "PON" => lambda {process_pon_message},
           "PRS" => lambda {process_presence_message},
           "DSC" => lambda {process_discovery_message},
@@ -72,9 +70,7 @@ module RubyNos
 
     def process_pin_message
       update_cloud
-      if agent_receptor?
-        send_response "PON", get_sequence_number_for_response
-      end
+      send_response "PON", get_sequence_number_for_response
     end
 
     def process_pon_message
@@ -113,7 +109,7 @@ module RubyNos
     end
 
     def update_cloud
-      agent.cloud.update({agent_uuid: sender_uuid, sequence_number: self.current_message.sequence_number, info: self.current_message.data, timestamp: self.current_message.timestamp})
+      agent.cloud.update({agent_uuid: sender_uuid, sequence_number: self.current_message.sequence_number, info: self.current_message.data, timestamp: self.current_message.timestamp}) unless agent.cloud.uuid == sender_uuid
     end
 
     def get_sequence_number_for_response
