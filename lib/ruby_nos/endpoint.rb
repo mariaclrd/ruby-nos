@@ -8,6 +8,7 @@ module RubyNos
     alias :st= :sticky=
     alias :ty= :type=
     alias :xp= :priority=
+    alias :ho= :host=
 
     def type= type
       if ALLOWED_TYPES.include?(type)
@@ -32,7 +33,7 @@ module RubyNos
           st: self.sticky,
           ty: self.type,
           xp: self.priority,
-          host: self.host
+          ho: self.host
       }
     end
   end
