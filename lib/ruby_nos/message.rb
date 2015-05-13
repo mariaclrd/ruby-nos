@@ -59,7 +59,7 @@ module RubyNos
     end
 
     def generate_miliseconds_timestamp
-      (Time.now.to_f*1000).to_i
+      Formatter.timestamp
     end
 
     def signature_generator

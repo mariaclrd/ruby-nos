@@ -70,7 +70,7 @@ module RubyNos
 
     def last_message_exists?(agent_uuid)
       remote_agent = cloud.info_on_the_list(agent_uuid)
-      ((Time.now.to_f*1000).to_i - remote_agent.timestamp) < RubyNos.keep_alive_time
+      (Formatter.timestamp - remote_agent.timestamp) < RubyNos.keep_alive_time
     end
 
     def build_message args

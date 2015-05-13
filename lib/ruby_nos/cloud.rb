@@ -34,7 +34,7 @@ module RubyNos
     private
 
     def timestamp_for_list
-      (Time.now.to_f*1000).to_i
+      Formatter.timestamp
     end
 
     def add_new_agent
@@ -74,7 +74,7 @@ module RubyNos
 
     def correct_timestamp?
       timestamp = info_on_the_list(self.current_agent.uuid).timestamp
-      (((Time.now - 60).to_f*1000).to_i < timestamp) && (timestamp <= timestamp_for_list)
+      ((Formatter.timestamp - RubyNos.keep_alive_time) < timestamp) && (timestamp <= timestamp_for_list)
     end
 
     def same_info?
