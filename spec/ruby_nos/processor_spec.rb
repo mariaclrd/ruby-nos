@@ -59,7 +59,7 @@ describe RubyNos::Processor do
     end
 
     context "#Presence message arrives" do
-      let(:message) {Message.new({type: "PRS", data: {:ap => "example_app"}}.merge(basic_message_to_cloud)).serialize_with_optional_fields({:options => [:dt]})}
+      let(:message) {Message.new({type: "PRS", data: {:ap => "example_app"}}.merge(basic_message_to_cloud)).serialize_message({:options => [:dt]})}
       let(:cloud_info_with_endpoints) {{agent_uuid: another_agent_uuid, sequence_number: sequence_number, info: {:ap => "example_app"}, timestamp: "something"}}
       it "store the information of the agent and update the list" do
         expect(cloud).to receive(:update).with(cloud_info_with_endpoints)
@@ -67,7 +67,7 @@ describe RubyNos::Processor do
       end
 
       context "#present equals false" do
-        let(:message) {Message.new({type: "PRS", data: {:ap => "example_app", :present => 0}}.merge(basic_message_to_cloud)).serialize_with_optional_fields({:options => [:dt]})}
+        let(:message) {Message.new({type: "PRS", data: {:ap => "example_app", :present => 0}}.merge(basic_message_to_cloud)).serialize_message({:options => [:dt]})}
         it "eliminates the agent from the cloud if present field is equal to false" do
           expect(cloud).to receive(:eliminate_from_list).with(another_agent_uuid)
           subject.process_message(json_message)
@@ -87,7 +87,7 @@ describe RubyNos::Processor do
     context "#Answer to an enquiry message arrives" do
       let(:rest_api) {RestApi.new}
       let(:endpoint_params) {{path: "/example", type: "PUBLIC", port: 5000, host: "localhost"}}
-      let(:message) {Message.new({type: "QNE", data: rest_api.to_hash}.merge(basic_message_to_cloud)).serialize_with_optional_fields({:options => [:dt]})}
+      let(:message) {Message.new({type: "QNE", data: rest_api.to_hash}.merge(basic_message_to_cloud)).serialize_message({:options => [:dt]})}
       let(:remote_agent) {RemoteAgent.new(uuid: "12345")}
 
       before(:each) do

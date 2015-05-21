@@ -29,12 +29,12 @@ describe "RubyNos::Message" do
 
   describe "#serialize_with_optional_fields" do
     it "returns the serialized message" do
-      expect(subject.serialize_with_optional_fields({:options => [:rx, :dt]}).keys).to eq([:v, :ty, :fr, :to, :hp, :rx, :ts, :sq, :dt, :sg])
+      expect(subject.serialize_message({:options => [:rx, :dt]}).keys).to eq([:v, :ty, :fr, :to, :hp, :rx, :ts, :sq, :dt, :sg])
     end
 
     it "adds a signature to each message" do
       expect_any_instance_of(SignatureGenerator).to receive(:generate_signature)
-      subject.serialize_with_optional_fields({:options => [:rx, :dt]})
+      subject.serialize_message({:options => [:rx, :dt]})
     end
   end
 end

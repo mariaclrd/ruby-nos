@@ -20,22 +20,18 @@ module RubyNos
       mandatory_fields.merge(optional_fields)
     end
 
-    def serialize_message
-      mandatory_fields.merge!({sg: signature_generator.generate_signature(mandatory_fields.to_s)})
-    end
-
-    def serialize_with_optional_fields options
-
+    def serialize_message options = {}
       message = mandatory_fields
 
-      options_hashes = options[:options].map do |option|
-        {option => optional_fields.fetch(option)}
-      end
+      unless options.empty?
+        options_hashes = options[:options].map do |option|
+          {option => optional_fields.fetch(option)}
+        end
 
-      options_hashes.each do |hashie|
-        message.merge!(hashie)
+        options_hashes.each do |hashie|
+          message.merge!(hashie)
+        end
       end
-
       message.merge!({sg: signature_generator.generate_signature(message.to_s)})
     end
 
