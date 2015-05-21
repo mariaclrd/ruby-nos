@@ -8,7 +8,8 @@ module RubyNos
     def send args={}
       socket = UDPSocket.open
       socket.setsockopt(:IPPROTO_IP, :IP_MULTICAST_TTL, 1)
-      RubyNos.logger.send(:info, "Message sent: #{args[:message]}")
+      #RubyNos.logger.send(:info, "Message sent: #{args[:message]}")
+      puts "Message sent: #{args[:message]}"
       socket.send(args[:message].to_json, 0, args[:host] || multicast_address, args[:port] || port)
       socket.close
     end

@@ -34,7 +34,8 @@ module RubyNos
     private
 
     def configure
-      RubyNos.logger.send(:info, "Binding socket to #{bind_addr} IP")
+      #RubyNos.logger.send(:info, "Binding socket to #{bind_addr} IP")
+      puts "Binding socket to #{bind_addr} IP"
       membership = IPAddr.new(multicast_address).hton + IPAddr.new(bind_addr).hton
       socket.setsockopt(:IPPROTO_IP, :IP_ADD_MEMBERSHIP, membership)
       socket.setsockopt(:SOL_SOCKET, :SO_REUSEPORT, 1)

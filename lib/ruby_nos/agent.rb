@@ -46,8 +46,10 @@ module RubyNos
           i = 0
           loop do
             i = i+1
-            RubyNos.logger.send(:info, "Iteration number #{i}")
-            RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list_of_agents.count}")
+            #RubyNos.logger.send(:info, "Iteration number #{i}")
+            puts "Iteration number #{i}"
+            #RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list_of_agents.count}")
+            puts "Agents on the cloud #{cloud.list_of_agents.count}"
             send_message({type: 'DSC'})
             send_message({type: 'ENQ'})
             unless cloud.list_of_agents.empty?
