@@ -29,7 +29,7 @@ module RubyNos
        }
       listen
       join_cloud
-      send_connection_messages
+      mantain_cloud
     end
 
     def send_message args={}
@@ -40,7 +40,7 @@ module RubyNos
 
     private
 
-    def send_connection_messages
+    def mantain_cloud
       begin
         thread = Thread.new do
           i = 0
@@ -48,17 +48,8 @@ module RubyNos
             i = i+1
             RubyNos.logger.send(:info, "Iteration number #{i}")
             RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list_of_agents.count}")
-            send_message({type: 'DSC'})
-            send_message({type: 'ENQ'})
-            unless cloud.list_of_agents.empty?
-              cloud.list_of_agents.each do |agent_uuid|
-                if last_message_exists?(agent_uuid)
-                  send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"})
-                else
-                  cloud.eliminate_from_list(agent_uuid)
-                end
-              end
-            end
+            send_discovery_messages
+            send_connection_messages
             sleep RubyNos.time_between_messages
           end
         end
@@ -66,6 +57,19 @@ module RubyNos
       rescue Exception => e
         RubyNos.logger.send(:info, "Error executing the thread #{e.message}")
       end
+    end
+
+    def send_connection_messages
+      unless cloud.list_of_agents.empty?
+        cloud.list_of_agents.each do |agent_uuid|
+          last_message_exists?(agent_uuid) ?  send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"}) : cloud.eliminate_from_list(agent_uuid)
+        end
+      end
+    end
+
+    def send_discovery_messages
+      send_message({type: 'DSC'})
+      send_message({type: 'ENQ'})
     end
 
     def last_message_exists?(agent_uuid)
@@ -82,11 +86,9 @@ module RubyNos
         data = rest_api.to_hash if rest_api
       end
 
-      if data
-        Message.new({from: "AGT:#{uuid_for_message(uuid)}", to: args[:to] || "CLD:#{uuid_for_message(cloud.uuid)}", type: args[:type], sequence_number: args[:sequence_number], data: data}).serialize_with_optional_fields({options: [:dt]})
-      else
-        Message.new({from: "AGT:#{uuid_for_message(uuid)}", to: args[:to] || "CLD:#{uuid_for_message(cloud.uuid)}", type: args[:type], sequence_number: args[:sequence_number]}).serialize_message
-      end
+      message_hash = {from: "AGT:#{uuid_for_message(uuid)}", to: args[:to] || "CLD:#{uuid_for_message(cloud.uuid)}", type: args[:type], sequence_number: args[:sequence_number]}
+
+      data ? Message.new(message_hash.merge!({data: data})).serialize_with_optional_fields({options: [:dt]}) : Message.new(message_hash).serialize_message
     end
 
 
