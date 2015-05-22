@@ -66,8 +66,8 @@ describe "#RubyNos::Agent" do
     let(:udp_socket){UDPReceptor.new}
     let(:rest_api) {RestApi.new}
     let(:endpoint) {Endpoint.new(path: "this_path")}
-    let(:well_formed_presence_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "PRS", sequence_number: 3, timestamp: "sometime", data: {present: 1, endpoints: ["UDP,#{udp_socket.socket.connect_address.ip_port},#{udp_socket.socket.connect_address.ip_address}"]}}).serialize({options: [:dt]})}
-    let(:well_formed_qne_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "QNE", sequence_number: 3, timestamp: "sometime", data: rest_api.to_hash}).serialize({options: [:dt]})}
+    let(:well_formed_presence_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "PRS", sequence_number: 3, timestamp: "sometime", data: {present: 1, endpoints: ["UDP,#{udp_socket.socket.connect_address.ip_port},#{udp_socket.socket.connect_address.ip_address}"]}}).serialize}
+    let(:well_formed_qne_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "QNE", sequence_number: 3, timestamp: "sometime", data: rest_api.to_hash}).serialize}
     let(:host) {"0.0.0.0"}
     let(:port) {"3784"}
 
