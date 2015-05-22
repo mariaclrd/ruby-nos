@@ -17,22 +17,21 @@ module RubyNos
     alias :ts= :timestamp=
 
     def to_hash
-      mandatory_fields.merge(optional_fields)
+      {
+          v:  self.version  || "1.0",
+          ty: self.type,
+          fr: self.from,
+          to: self.to,
+          hp: self.hops     || RubyNos.hops,
+          ts: self.timestamp || generate_miliseconds_timestamp,
+          sq: self.sequence_number,
+          rx: self.reliable || 0,
+          dt: self.data
+      }.delete_if{|key, value| value==nil  || value == {}}
     end
 
-    def serialize_message options = {}
-      message = mandatory_fields
-
-      unless options.empty?
-        options_hashes = options[:options].map do |option|
-          {option => optional_fields.fetch(option)}
-        end
-
-        options_hashes.each do |hashie|
-          message.merge!(hashie)
-        end
-      end
-      message.merge!({sg: signature_generator.generate_signature(message.to_s)})
+    def serialize
+      to_hash.merge!({sg: signature_generator.generate_signature(to_hash.to_s)})
     end
 
     def sequence_number
@@ -41,32 +40,12 @@ module RubyNos
 
     private
 
-    def mandatory_fields
-      {
-          v:  self.version  || "1.0",
-          ty: self.type,
-          fr: self.from,
-          to: self.to,
-          hp: self.hops     || RubyNos.hops,
-          rx: 0,
-          ts: self.timestamp || generate_miliseconds_timestamp,
-          sq: self.sequence_number
-      }
-    end
-
     def generate_miliseconds_timestamp
       Formatter.timestamp
     end
 
     def signature_generator
       @signature_generator ||= SignatureGenerator.new
-    end
-
-    def optional_fields
-      {
-          rx: self.reliable || false,
-          dt: self.data
-      }
     end
   end
 end

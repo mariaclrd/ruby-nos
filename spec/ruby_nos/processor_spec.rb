@@ -25,14 +25,14 @@ describe RubyNos::Processor do
   end
 
   describe "#process_message" do
-    let(:message){Message.new({type: "PIN"}.merge(basic_message_to_agent)).serialize_message}
+    let(:message){Message.new({type: "PIN"}.merge(basic_message_to_agent)).serialize}
     it "checks the signature of the messages" do
       expect_any_instance_of(SignatureGenerator).to receive(:valid_signature?)
       subject.process_message(json_message)
     end
 
     context "PING message arrives" do
-      let(:message){Message.new({type: "PIN"}.merge(basic_message_to_agent)).serialize_message}
+      let(:message){Message.new({type: "PIN"}.merge(basic_message_to_agent)).serialize}
       it "it sends a PON and increments the sequence number" do
         expect(cloud).to receive(:update).with(cloud_info)
         expect(agent).to receive(:send_message).with({:type => "PON", sequence_number: sequence_number + 1})
@@ -41,7 +41,7 @@ describe RubyNos::Processor do
     end
 
     context "PONG messages arrives" do
-      let(:message){Message.new({type: "PON"}.merge(basic_message_to_cloud)).serialize_message}
+      let(:message){Message.new({type: "PON"}.merge(basic_message_to_cloud)).serialize}
       it "it updates the cloud list" do
         expect(cloud).to receive(:update).with(cloud_info)
         subject.process_message(json_message)
@@ -49,7 +49,7 @@ describe RubyNos::Processor do
     end
 
     context "Discovery message arrives" do
-      let(:message){Message.new({type: "DSC"}.merge(basic_message_to_cloud)).serialize_message}
+      let(:message){Message.new({type: "DSC"}.merge(basic_message_to_cloud)).serialize}
       it "it updates the cloud if the user is not on the list and sends a PRS and increments the sequence number" do
         expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
         expect(cloud).to receive(:update).with(cloud_info)
@@ -59,7 +59,7 @@ describe RubyNos::Processor do
     end
 
     context "#Presence message arrives" do
-      let(:message) {Message.new({type: "PRS", data: {:ap => "example_app"}}.merge(basic_message_to_cloud)).serialize_message({:options => [:dt]})}
+      let(:message) {Message.new({type: "PRS", data: {:ap => "example_app"}}.merge(basic_message_to_cloud)).serialize({:options => [:dt]})}
       let(:cloud_info_with_endpoints) {{agent_uuid: another_agent_uuid, sequence_number: sequence_number, info: {:ap => "example_app"}, timestamp: "something"}}
       it "store the information of the agent and update the list" do
         expect(cloud).to receive(:update).with(cloud_info_with_endpoints)
@@ -67,7 +67,7 @@ describe RubyNos::Processor do
       end
 
       context "#present equals false" do
-        let(:message) {Message.new({type: "PRS", data: {:ap => "example_app", :present => 0}}.merge(basic_message_to_cloud)).serialize_message({:options => [:dt]})}
+        let(:message) {Message.new({type: "PRS", data: {:ap => "example_app", :present => 0}}.merge(basic_message_to_cloud)).serialize({:options => [:dt]})}
         it "eliminates the agent from the cloud if present field is equal to false" do
           expect(cloud).to receive(:eliminate_from_list).with(another_agent_uuid)
           subject.process_message(json_message)
@@ -76,7 +76,7 @@ describe RubyNos::Processor do
     end
 
     context "#Enquiry message arrives" do
-      let(:message) {Message.new({type: "ENQ"}.merge(basic_message_to_cloud)).serialize_message}
+      let(:message) {Message.new({type: "ENQ"}.merge(basic_message_to_cloud)).serialize}
       it "returns a QNE message" do
         expect(cloud).to receive(:update).with(cloud_info)
         expect(agent).to receive(:send_message).with({:type => "QNE", sequence_number: sequence_number + 1})
@@ -87,7 +87,7 @@ describe RubyNos::Processor do
     context "#Answer to an enquiry message arrives" do
       let(:rest_api) {RestApi.new}
       let(:endpoint_params) {{path: "/example", type: "PUBLIC", port: 5000, host: "localhost"}}
-      let(:message) {Message.new({type: "QNE", data: rest_api.to_hash}.merge(basic_message_to_cloud)).serialize_message({:options => [:dt]})}
+      let(:message) {Message.new({type: "QNE", data: rest_api.to_hash}.merge(basic_message_to_cloud)).serialize({:options => [:dt]})}
       let(:remote_agent) {RemoteAgent.new(uuid: "12345")}
 
       before(:each) do

@@ -87,8 +87,9 @@ module RubyNos
       end
 
       message_hash = {from: "AGT:#{uuid_for_message(uuid)}", to: args[:to] || "CLD:#{uuid_for_message(cloud.uuid)}", type: args[:type], sequence_number: args[:sequence_number]}
+      message_hash.merge!({data: data}) if data
 
-      data ? Message.new(message_hash.merge!({data: data})).serialize_message({options: [:dt]}) : Message.new(message_hash).serialize_message
+      Message.new(message_hash).serialize
     end
 
 

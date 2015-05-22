@@ -7,7 +7,7 @@ describe RubyNos::UDPSender do
   subject{UDPSender.new}
 
   describe "#send" do
-    let(:message) {{message: Message.new.serialize_message}}
+    let(:message) {{message: Message.new.serialize}}
 
     context "multicast address by default" do
       let(:host)      {"230.31.32.33"}
