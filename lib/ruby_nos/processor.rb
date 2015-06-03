@@ -98,11 +98,11 @@ module RubyNos
     end
 
     def process_enquiry_answer_message
-      if agent.cloud.is_on_the_list?(sender_uuid)
-        remote_agent = agent.cloud.info_on_the_list(sender_uuid)
+      if agent.cloud.list.is_on_the_list?(sender_uuid)
+        remote_agent = agent.cloud.list.info_for(sender_uuid)
         remote_agent.rest_api = received_api
         remote_agent.timestamp = self.current_message.timestamp
-        agent.cloud.update_info(remote_agent.uuid, remote_agent)
+        agent.cloud.list.update(remote_agent.uuid, remote_agent)
       else
         agent.cloud.insert_new_remote_agent(RemoteAgent.new({uuid: sender_uuid, sequence_number: self.current_message.sequence_number, rest_api: received_api}))
       end
