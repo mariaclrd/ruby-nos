@@ -1,62 +1,53 @@
 module RubyNos
   class Cloud < ListforAgents
     include Initializable
-    attr_accessor :uuid, :current_agent
-
-    alias agents_info list
+    attr_accessor :uuid, :current_agent, :list
 
     def uuid
       @uuid ||= RubyNos.cloud_uuid
     end
+    
+    def list
+      @list ||= List.new
+    end
 
     def update agent_info
-      self.current_agent = RemoteAgent.new(uuid: agent_info[:agent_uuid], sequence_number: (agent_info[:sequence_number] || nil), timestamp: (agent_info[:timestamp] || timestamp_for_list))
-      info = agent_info[:info]
-      self.current_agent.endpoints = process_endpoints(info[:endpoints]) if (info && info[:endpoints])
+      if agent_info.is_a?(Hash)
+        self.current_agent = build_remote_agent(agent_info)
+      else
+        self.current_agent = agent_info
+      end
 
       if !is_on_the_list?(self.current_agent.uuid)
-        add_new_agent
+        RubyNos.logger.send(:info, "Added agent #{self.current_agent.uuid}")
+        list.add(self.current_agent)
       else
-        process_existent_agent
-      end
-    end
-
-    def insert_new_remote_agent agent
-      self.current_agent = agent
-      add_new_agent
-    end
-
-    def update_info uuid, agent=nil
-      agents_info.select{|e| e[uuid]}.first[uuid] = (agent || self.current_agent)
-    end
-
-
-    private
-
-    def timestamp_for_list
-      Formatter.timestamp
-    end
-
-    def add_new_agent
-      RubyNos.logger.send(:info, "Added agent #{self.current_agent.uuid}")
-      agents_info << {self.current_agent.uuid => self.current_agent}
-    end
-
-    def process_existent_agent
-      if correct_sequence_number? && correct_timestamp?
         update_actual_info
       end
     end
 
-    def remote_agent_on_the_list
-      info_on_the_list(self.current_agent.uuid)
+    private
+
+    def build_remote_agent agent_info
+      agent = RemoteAgent.new(uuid: agent_info[:agent_uuid], sequence_number: (agent_info[:sequence_number] || nil), timestamp: (agent_info[:timestamp] || timestamp_for_list))
+      info = agent_info[:info]
+      agent.endpoints = process_endpoints(info[:endpoints]) if (info && info[:endpoints])
+      agent
+    end
+      
+    def timestamp_for_list
+      Formatter.timestamp
+    end
+    
+    def update_actual_info
+      if correct_sequence_number && correct_timestamp? && !same_info?
+        prepare_agent
+        list.update(self.current_agent.uuid, self.current_agent)
+      end
     end
 
-    def update_actual_info
-      unless same_info?
-        prepare_agent
-        update_info(self.current_agent.uuid)
-      end
+    def remote_agent_on_the_list
+      list.info_for(self.current_agent.uuid)
     end
 
     def prepare_agent
