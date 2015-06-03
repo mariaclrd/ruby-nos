@@ -1,5 +1,5 @@
 module RubyNos
-  class ListforAgents
+  class List
     include Initializable
     attr_accessor :list
 
@@ -7,21 +7,28 @@ module RubyNos
       @list ||= []
     end
 
-    def eliminate_from_list uuid
+    def add element
+      list << {element.uuid => element}
+    end
+    
+    def update uuid, new_element
+      list.select{|e| e[uuid]}.first[uuid] = new_element
+    end
+      
+    def eliminate uuid
       list.delete_if{|e| e.keys.first == uuid}
     end
 
-    def info_on_the_list uuid
+    def info_for uuid
       list.select{|e| e[uuid]}.first[uuid]
     end
 
-    def list_of_agents
+    def list_of_keys
       list.map{|e| e.keys}.flatten
     end
 
     def is_on_the_list? uuid
-      list_of_agents.include?(uuid)
+      list_of_keys.include?(uuid)
     end
-
   end
 end
