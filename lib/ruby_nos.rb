@@ -7,7 +7,7 @@ module RubyNos
   autoload :Endpoint,            "ruby_nos/endpoint"
   autoload :Formatter,           "ruby_nos/formatter"
   autoload :Initializable,       "initializable"
-  autoload :ListforAgents,       "ruby_nos/list_for_agents"
+  autoload :List,                "ruby_nos/list"
   autoload :Message,             "ruby_nos/message"
   autoload :Processor,           "ruby_nos/processor"
   autoload :RemoteAgent,         "ruby_nos/remote_agent"
