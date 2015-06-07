@@ -23,13 +23,6 @@ describe "#RubyNos::RemoteAgent" do
     end
   end
 
-  describe "#same_timestamp?" do
-    it "compares the timestamp with another agent" do
-      expect(subject.same_timestamp?(subject)).to eq(true)
-      expect(subject.same_timestamp?(another_agent)).to eq(false)
-    end
-  end
-
   describe "#same_endpoints?" do
     it "compares the timestamp with another agent" do
       expect(subject.same_endpoints?(subject)).to eq(true)

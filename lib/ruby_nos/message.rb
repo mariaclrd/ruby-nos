@@ -3,18 +3,19 @@ require "initializable"
 
 module RubyNos
   class Message
+    include Aliasing
 
     include Initializable
     attr_accessor :version, :from, :type, :to, :hops, :reliable, :data, :signature, :sequence_number, :id, :timestamp
-    alias :v= :version=
-    alias :fr= :from=
-    alias :ty= :type=
-    alias :hp= :hops=
-    alias :rx= :reliable=
-    alias :dt= :data=
-    alias :sq= :sequence_number=
-    alias :sg= :signature=
-    alias :ts= :timestamp=
+    attr_alias :v,  :version
+    attr_alias :fr, :from
+    attr_alias :ty, :type
+    attr_alias :hp, :hops
+    attr_alias :rx, :reliable
+    attr_alias :dt, :data
+    attr_alias :sq, :sequence_number
+    attr_alias :sg, :signature
+    attr_alias :ts, :timestamp
 
     def to_hash
       {

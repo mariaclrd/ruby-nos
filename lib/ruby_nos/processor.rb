@@ -79,14 +79,14 @@ module RubyNos
 
     def process_presence_message
       if self.current_message.data[:present] == 0
-        agent.cloud.eliminate_from_list(sender_uuid)
+        agent.cloud.list.eliminate(sender_uuid)
       else
         update_cloud
       end
     end
 
     def process_discovery_message
-      if !agent.cloud.is_on_the_list?(sender_uuid)
+      if !agent.cloud.list.is_on_the_list?(sender_uuid)
         update_cloud
       end
       send_response "PRS", get_sequence_number_for_response
@@ -98,14 +98,7 @@ module RubyNos
     end
 
     def process_enquiry_answer_message
-      if agent.cloud.list.is_on_the_list?(sender_uuid)
-        remote_agent = agent.cloud.list.info_for(sender_uuid)
-        remote_agent.rest_api = received_api
-        remote_agent.timestamp = self.current_message.timestamp
-        agent.cloud.list.update(remote_agent.uuid, remote_agent)
-      else
-        agent.cloud.insert_new_remote_agent(RemoteAgent.new({uuid: sender_uuid, sequence_number: self.current_message.sequence_number, rest_api: received_api}))
-      end
+      agent.cloud.update(RemoteAgent.new({uuid: sender_uuid, sequence_number: self.current_message.sequence_number, timestamp: self.current_message.timestamp, rest_api: received_api}))
     end
 
     def update_cloud

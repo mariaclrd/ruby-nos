@@ -9,8 +9,9 @@ describe "#RubyNos::Agent" do
     subject.udp_rx.socket.close
   end
 
-  describe "#configure" do
+  describe "#start!" do
     let(:cloud) {Cloud.new(uuid: cloud_uuid)}
+    let(:list) {double("list")}
     let(:agent_uuid) {"12345"}
 
     before(:each) do
@@ -21,13 +22,13 @@ describe "#RubyNos::Agent" do
 
     it "initialize the UDPReceptor" do
       expect(subject.udp_rx).to receive(:listen)
-      thread = subject.configure
+      thread = subject.start!
       thread.kill
     end
 
     it "joins the cloud" do
       expect(subject).to receive(:send_message).with({type: "PRS"})
-      thread = subject.configure
+      thread = subject.start!
       thread.kill
     end
 
@@ -40,19 +41,19 @@ describe "#RubyNos::Agent" do
         expect(subject).to receive(:send_message).with({type: "ENQ"})
         expect(subject).to receive(:last_message_exists?).with(agent_uuid).and_return(true)
         expect(subject).to receive(:send_message).with({type: "PIN", to: "AGT:12345"})
-        thread = subject.configure
+        thread = subject.start!
         sleep 0.1
         thread.kill
       end
 
-      it "eliminates an agent from the cloud if there is many time without receiving a new message" do
+      it "eliminates an agent from the cloud if it has passed a certain amount of time without receiving a new message" do
         cloud.update({agent_uuid: agent_uuid})
         expect(subject).to receive(:send_message).with({type: "PRS"})
         expect(subject).to receive(:send_message).with({type: "DSC"})
         expect(subject).to receive(:send_message).with({type: "ENQ"})
         expect(subject).to receive(:last_message_exists?).with(agent_uuid).and_return(false)
-        expect(cloud).to receive(:eliminate_from_list).with(agent_uuid)
-        thread = subject.configure
+        expect(cloud.list).to receive(:eliminate).with(agent_uuid)
+        thread = subject.start!
         sleep 0.1
         thread.kill
       end

@@ -6,7 +6,8 @@ describe RubyNos::Processor do
   let(:agent)                       {Agent.new(:uuid => agent_uuid)}
   let(:json_message)                {message.to_json}
   let(:udp_socket)                  {double("UDPSocket", :receptor_address => [12345, "localhost"])}
-  let(:cloud)                       {double("Cloud", :agent_list => [agent.uuid], :uuid => cloud_uuid)}
+  let(:cloud)                       {double("Cloud", :uuid => cloud_uuid, list: list)}
+  let(:list)                        {double("list")}
   let(:agent_uuid)                  {SecureRandom.uuid}
   let(:cloud_uuid)                  {SecureRandom.uuid}
   let(:received_agent_uuid)         {agent_uuid.gsub("-", "")}
@@ -51,7 +52,7 @@ describe RubyNos::Processor do
     context "Discovery message arrives" do
       let(:message){Message.new({type: "DSC"}.merge(basic_message_to_cloud)).serialize}
       it "it updates the cloud if the user is not on the list and sends a PRS and increments the sequence number" do
-        expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
+        expect(list).to receive(:is_on_the_list?).with(another_agent_uuid)
         expect(cloud).to receive(:update).with(cloud_info)
         expect(agent).to receive(:send_message).with({:type => "PRS", sequence_number: sequence_number + 1})
         subject.process_message(json_message)
@@ -69,7 +70,7 @@ describe RubyNos::Processor do
       context "#present equals false" do
         let(:message) {Message.new({type: "PRS", data: {:ap => "example_app", :present => 0}}.merge(basic_message_to_cloud)).serialize}
         it "eliminates the agent from the cloud if present field is equal to false" do
-          expect(cloud).to receive(:eliminate_from_list).with(another_agent_uuid)
+          expect(list).to receive(:eliminate).with(another_agent_uuid)
           subject.process_message(json_message)
         end
       end
@@ -88,25 +89,15 @@ describe RubyNos::Processor do
       let(:rest_api) {RestApi.new}
       let(:endpoint_params) {{path: "/example", type: "PUBLIC", port: 5000, host: "localhost"}}
       let(:message) {Message.new({type: "QNE", data: rest_api.to_hash}.merge(basic_message_to_cloud)).serialize}
-      let(:remote_agent) {RemoteAgent.new(uuid: "12345")}
+      let(:remote_agent) {double("remote_agent")}
 
       before(:each) do
         rest_api.add_endpoint(endpoint_params)
       end
 
       it "stores the information of the api in the remote agent" do
-        expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
-        expect(cloud).to receive(:insert_new_remote_agent).with(an_instance_of(RemoteAgent))
-        subject.process_message(json_message)
-      end
-
-      it "updates the info on the list if the user already exists on the list" do
-        expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid)
-        expect(cloud).to receive(:insert_new_remote_agent).with(an_instance_of(RemoteAgent))
-        subject.process_message(json_message)
-        expect(cloud).to receive(:is_on_the_list?).with(another_agent_uuid).and_return(true)
-        expect(cloud).to receive(:info_on_the_list).with(another_agent_uuid).and_return(remote_agent)
-        expect(cloud).to receive(:update_info).with(remote_agent.uuid, remote_agent)
+        expect(RemoteAgent).to receive(:new).with(uuid: another_agent_uuid, sequence_number: sequence_number, timestamp: "something", rest_api: an_instance_of(RestApi)).and_return(remote_agent)
+        expect(cloud).to receive(:update).with(remote_agent)
         subject.process_message(json_message)
       end
     end

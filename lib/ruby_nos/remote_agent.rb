@@ -15,10 +15,6 @@ module RubyNos
       endpoints.map{|e| e.to_hash}
     end
 
-    def same_timestamp? another_agent
-      timestamp == another_agent.timestamp
-    end
-
     def same_endpoints? another_agent
       endpoints_collection == another_agent.endpoints_collection
     end

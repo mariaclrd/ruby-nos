@@ -3,6 +3,7 @@ require 'mini_logger'
 
 module RubyNos
   autoload :Agent,               "ruby_nos/agent"
+  autoload :Aliasing,            "ruby_nos/aliasing"
   autoload :Cloud,               "ruby_nos/cloud"
   autoload :Endpoint,            "ruby_nos/endpoint"
   autoload :Formatter,           "ruby_nos/formatter"

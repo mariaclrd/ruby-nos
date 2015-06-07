@@ -23,7 +23,7 @@ module RubyNos
       @processor ||= Processor.new(self)
     end
 
-    def configure
+    def start!
        at_exit {
          send_desconnection_message
        }
@@ -47,7 +47,7 @@ module RubyNos
           loop do
             i = i+1
             RubyNos.logger.send(:info, "Iteration number #{i}")
-            RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list_of_agents.count}")
+            RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list.list_of_keys.count}")
             send_discovery_messages
             send_connection_messages
             sleep RubyNos.time_between_messages
@@ -60,9 +60,9 @@ module RubyNos
     end
 
     def send_connection_messages
-      unless cloud.list_of_agents.empty?
-        cloud.list_of_agents.each do |agent_uuid|
-          last_message_exists?(agent_uuid) ?  send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"}) : cloud.eliminate_from_list(agent_uuid)
+      unless cloud.list.list_of_keys.empty?
+        cloud.list.list_of_keys.each do |agent_uuid|
+          last_message_exists?(agent_uuid) ?  send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"}) : cloud.list.eliminate(agent_uuid)
         end
       end
     end
@@ -73,7 +73,7 @@ module RubyNos
     end
 
     def last_message_exists?(agent_uuid)
-      remote_agent = cloud.info_on_the_list(agent_uuid)
+      remote_agent = cloud.list.info_for(agent_uuid)
       (Formatter.timestamp - remote_agent.timestamp) < RubyNos.keep_alive_time
     end
 
