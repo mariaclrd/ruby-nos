@@ -9,6 +9,14 @@ describe "RubyNos::Message" do
       expect(message.from).to eq("Alice")
       expect(message.to).to eq("Bob")
     end
+
+    context "using the keys of the message" do
+      let(:message) {Message.new(v: "1.0", fr: "someone")}
+      it "allows to put the value in the correct attribute" do
+        expect(message.version).to eq("1.0")
+        expect(message.from).to eq("someone")
+      end
+    end
   end
 
   describe "#serialize" do
