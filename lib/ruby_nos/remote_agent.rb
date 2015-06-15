@@ -1,7 +1,7 @@
 module RubyNos
   class RemoteAgent
     include Initializable
-    attr_accessor :uuid, :sequence_number, :rest_api, :endpoints, :timestamp
+    attr_accessor :uuid, :rest_api, :endpoints, :timestamp
 
     def endpoints
       @endpoints ||= []
@@ -20,7 +20,22 @@ module RubyNos
     end
 
     def same_api? another_agent
-      rest_api.to_hash == another_agent.rest_api.to_hash
+      if rest_api && another_agent.rest_api
+        rest_api.to_hash == another_agent.rest_api.to_hash
+      else
+        false
+      end
+    end
+
+    def same_timestamp? another_agent
+      timestamp == another_agent.timestamp
+    end
+
+    def to_hash
+      {
+          uuid: uuid,
+          timestamp: Time.at(timestamp/1000)
+      }
     end
   end
 end
