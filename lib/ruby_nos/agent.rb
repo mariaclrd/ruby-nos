@@ -107,7 +107,7 @@ module RubyNos
 
     def join_cloud
       send_message({type: 'PRS'})
-      send_message({type: 'QNE'}) if rest_api
+      send_message({type: 'QNE'}) unless rest_api.endpoints.empty?
     end
 
     def formatter

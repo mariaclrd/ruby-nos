@@ -29,25 +29,25 @@ module RubyNos
     private
 
     def build_remote_agent agent_info
-      agent = RemoteAgent.new(uuid: agent_info[:agent_uuid], sequence_number: (agent_info[:sequence_number] || nil), timestamp: (agent_info[:timestamp] || timestamp_for_list))
+      agent = RemoteAgent.new(uuid: agent_info[:agent_uuid], timestamp: (agent_info[:timestamp] || timestamp_for_list))
       info = agent_info[:info]
       agent.endpoints = process_endpoints(info[:endpoints]) if (info && info[:endpoints])
       agent
     end
       
     def timestamp_for_list
-      @timestamp ||= Formatter.timestamp
+      Formatter.timestamp
     end
     
     def update_actual_info
-      if correct_sequence_number? && correct_timestamp? && !same_info?
+      if correct_timestamp? && !same_info?
         prepare_agent
         list.update(self.current_agent.uuid, self.current_agent)
       end
     end
 
     def remote_agent_on_the_list
-      @remote_agent ||= list.info_for(self.current_agent.uuid)
+      list.info_for(self.current_agent.uuid)
     end
 
     def prepare_agent
@@ -59,17 +59,13 @@ module RubyNos
       end
     end
 
-    def correct_sequence_number?
-      remote_agent_on_the_list.sequence_number < self.current_agent.sequence_number
-    end
-
     def correct_timestamp?
       timestamp = current_agent.timestamp
       ((timestamp_for_list - RubyNos.keep_alive_time) < timestamp) && (timestamp <= timestamp_for_list)
     end
 
     def same_info?
-      remote_agent_on_the_list.same_endpoints?(self.current_agent) && remote_agent_on_the_list.same_api?(self.current_agent)
+      remote_agent_on_the_list.same_endpoints?(self.current_agent) && remote_agent_on_the_list.same_api?(self.current_agent) && remote_agent_on_the_list.same_timestamp?(self.current_agent)
     end
 
     def process_endpoints endpoints
