@@ -6,14 +6,13 @@ module RubyNos
     include Aliasing
 
     include Initializable
-    attr_accessor :version, :from, :type, :to, :hops, :reliable, :data, :signature, :sequence_number, :id, :timestamp
+    attr_accessor :version, :from, :type, :to, :hops, :reliable, :data, :id, :signature, :timestamp
     attr_alias :v,  :version
     attr_alias :fr, :from
     attr_alias :ty, :type
     attr_alias :hp, :hops
     attr_alias :rx, :reliable
     attr_alias :dt, :data
-    attr_alias :sq, :sequence_number
     attr_alias :sg, :signature
     attr_alias :ts, :timestamp
 
@@ -25,7 +24,6 @@ module RubyNos
           to: self.to,
           hp: self.hops     || RubyNos.hops,
           ts: self.timestamp || generate_miliseconds_timestamp,
-          sq: self.sequence_number,
           rx: self.reliable || 0,
           dt: self.data
       }.delete_if{|key, value| value==nil  || value == {}}
@@ -33,10 +31,6 @@ module RubyNos
 
     def serialize
       to_hash.merge!({sg: signature_generator.generate_signature(to_hash.to_s)})
-    end
-
-    def sequence_number
-      @sequence_number || Time.now.to_i
     end
 
     private

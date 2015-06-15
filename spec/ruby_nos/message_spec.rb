@@ -22,11 +22,7 @@ describe "RubyNos::Message" do
   describe "#serialize" do
     let(:message) {Message.new}
     it "returns the serialized message with the keys that have a value" do
-      expect(message.serialize.keys).to eq([:v, :hp, :ts, :sq, :rx, :sg])
-    end
-
-    it "generates a sequence number if it is not specified" do
-      expect(message.serialize[:sq]).to eq(Time.now.to_i)
+      expect(message.serialize.keys).to eq([:v, :hp, :ts, :rx, :sg])
     end
 
     it "adds a signature to each message" do
@@ -39,7 +35,7 @@ describe "RubyNos::Message" do
       let(:message) {Message.new(params)}
 
       it "returns the serialized message with all the keys" do
-        expect(message.serialize.keys).to eq([:v, :ty, :fr, :to, :hp, :ts, :sq, :rx, :dt, :sg])
+        expect(message.serialize.keys).to eq([:v, :ty, :fr, :to, :hp, :ts, :rx, :dt, :sg])
       end
     end
   end
