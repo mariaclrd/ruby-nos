@@ -1,7 +1,7 @@
 module RubyNos
   class Agent
     include Initializable
-    attr_accessor :uuid, :cloud, :pending_response_list, :udp_tx, :udp_rx,:processor, :rest_api
+    attr_accessor :uuid, :cloud, :udp_tx, :udp_rx,:processor, :rest_api
 
     def uuid
       @uuid ||= SecureRandom.uuid
@@ -21,6 +21,10 @@ module RubyNos
 
     def processor
       @processor ||= Processor.new(self)
+    end
+
+    def rest_api
+      @rest_api ||= RestApi.new
     end
 
     def start!
@@ -86,7 +90,7 @@ module RubyNos
         data = rest_api.to_hash if rest_api
       end
 
-      message_hash = {from: "AGT:#{uuid_for_message(uuid)}", to: args[:to] || "CLD:#{uuid_for_message(cloud.uuid)}", type: args[:type], sequence_number: args[:sequence_number]}
+      message_hash = {from: "AGT:#{uuid_for_message(uuid)}", to: args[:to] || "CLD:#{uuid_for_message(cloud.uuid)}", type: args[:type]}
       message_hash.merge!({data: data}) if data
 
       Message.new(message_hash).serialize

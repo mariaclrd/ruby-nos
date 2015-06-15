@@ -67,8 +67,8 @@ describe "#RubyNos::Agent" do
     let(:udp_socket){UDPReceptor.new}
     let(:rest_api) {RestApi.new}
     let(:endpoint) {Endpoint.new(path: "this_path")}
-    let(:well_formed_presence_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "PRS", sequence_number: 3, timestamp: "sometime", data: {present: 1, endpoints: ["UDP,#{udp_socket.socket.connect_address.ip_port},#{udp_socket.socket.connect_address.ip_address}"]}}).serialize}
-    let(:well_formed_qne_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "QNE", sequence_number: 3, timestamp: "sometime", data: rest_api.to_hash}).serialize}
+    let(:well_formed_presence_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "PRS", timestamp: "sometime", data: {present: 1, endpoints: ["UDP,#{udp_socket.socket.connect_address.ip_port},#{udp_socket.socket.connect_address.ip_address}"]}}).serialize}
+    let(:well_formed_qne_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "QNE", timestamp: "sometime", data: rest_api.to_hash}).serialize}
     let(:host) {"0.0.0.0"}
     let(:port) {"3784"}
 
@@ -81,27 +81,21 @@ describe "#RubyNos::Agent" do
     end
 
     it "sends a message using the UDP Socket" do
-      expect(Message).to receive(:new).with({:from => "AGT:#{subject.uuid.gsub("-", "")}", :to => "CLD:#{cloud.uuid.gsub("-", "")}", :type => "DSC", :sequence_number => nil}).and_return(message)
+      expect(Message).to receive(:new).with({:from => "AGT:#{subject.uuid.gsub("-", "")}", :to => "CLD:#{cloud.uuid.gsub("-", "")}", :type => "DSC"}).and_return(message)
       expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
       subject.send_message({:type => "DSC", :port => port, :host => host})
-    end
-
-    it "used the sequence number passed if it appears" do
-      expect(Message).to receive(:new).with({:from => "AGT:#{subject.uuid.gsub("-", "")}", :to => "CLD:#{cloud.uuid.gsub("-", "")}", :type => "DSC", :sequence_number => 3}).and_return(message)
-      expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
-      subject.send_message({:type => "DSC", :port => port, :host => host, :sequence_number => 3})
     end
 
     it "add the UDP socket info if it is a presence message" do
       allow(subject).to receive(:udp_rx).and_return(udp_socket)
       expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => well_formed_presence_message})
-      subject.send_message({:type => "PRS", :port => port, :host => host, :sequence_number => 3})
+      subject.send_message({:type => "PRS", :port => port, :host => host})
     end
 
     it "add the RestAPI info if it is a QNE message" do
       allow(subject).to receive(:udp_rx).and_return(udp_socket)
       expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => well_formed_qne_message})
-      subject.send_message({:type => "QNE", :port => port, :host => host, :sequence_number => 3})
+      subject.send_message({:type => "QNE", :port => port, :host => host})
     end
   end
 end
