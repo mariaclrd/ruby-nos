@@ -70,7 +70,7 @@ module RubyNos
 
     def process_pin_message
       update_cloud
-      send_response "PON", get_sequence_number_for_response
+      send_response "PON"
     end
 
     def process_pon_message
@@ -86,27 +86,23 @@ module RubyNos
     end
 
     def process_discovery_message
-      if !agent.cloud.list.is_on_the_list?(sender_uuid)
+      unless agent.cloud.list.is_on_the_list?(sender_uuid)
         update_cloud
       end
-      send_response "PRS", get_sequence_number_for_response
+      send_response "PRS"
     end
 
     def process_enquiry_message
       update_cloud
-      send_response "QNE", get_sequence_number_for_response
+      send_response "QNE"
     end
 
     def process_enquiry_answer_message
-      agent.cloud.update(RemoteAgent.new({uuid: sender_uuid, sequence_number: self.current_message.sequence_number, timestamp: self.current_message.timestamp, rest_api: received_api}))
+      agent.cloud.update(RemoteAgent.new({uuid: sender_uuid, timestamp: self.current_message.timestamp, rest_api: received_api}))
     end
 
     def update_cloud
-      agent.cloud.update({agent_uuid: sender_uuid, sequence_number: self.current_message.sequence_number, info: self.current_message.data, timestamp: self.current_message.timestamp}) unless agent.cloud.uuid == sender_uuid
-    end
-
-    def get_sequence_number_for_response
-      self.current_message.sequence_number + 1
+      agent.cloud.update({agent_uuid: sender_uuid, info: self.current_message.data, timestamp: self.current_message.timestamp}) unless agent.cloud.uuid == sender_uuid
     end
 
     def agent_receptor?
@@ -130,8 +126,8 @@ module RubyNos
       end
     end
 
-    def send_response type, sequence_number
-      agent.send_message({type: type, sequence_number: sequence_number })
+    def send_response type
+      agent.send_message({type: type})
     end
   end
 end

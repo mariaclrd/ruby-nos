@@ -14,10 +14,9 @@ describe RubyNos::Processor do
   let(:another_agent_uuid)          {SecureRandom.uuid}
   let(:another_agent_uuid_received) {another_agent_uuid.gsub("-", "")}
   let(:received_cloud_uuid)         {cloud_uuid.gsub("-", "")}
-  let(:sequence_number)             {12345}
-  let(:basic_message_to_agent)               {{from: "AGT:#{another_agent_uuid_received}", to: "AGT:#{received_agent_uuid}", sequence_number: sequence_number, timestamp: "something"}}
-  let(:basic_message_to_cloud)               {{from: "AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", sequence_number: sequence_number, timestamp: "something"}}
-  let(:cloud_info) {{agent_uuid: another_agent_uuid, sequence_number: sequence_number, info: nil, timestamp: "something"}}
+  let(:basic_message_to_agent)               {{from: "AGT:#{another_agent_uuid_received}", to: "AGT:#{received_agent_uuid}", timestamp: "something"}}
+  let(:basic_message_to_cloud)               {{from: "AGT:#{another_agent_uuid_received}", to: "CLD:#{received_cloud_uuid}", timestamp: "something"}}
+  let(:cloud_info) {{agent_uuid: another_agent_uuid, info: nil, timestamp: "something"}}
 
   before(:each) do
     allow_any_instance_of(UDPSender).to receive(:send).and_return(nil)
@@ -34,9 +33,9 @@ describe RubyNos::Processor do
 
     context "PING message arrives" do
       let(:message){Message.new({type: "PIN"}.merge(basic_message_to_agent)).serialize}
-      it "it sends a PON and increments the sequence number" do
+      it "it sends a PON" do
         expect(cloud).to receive(:update).with(cloud_info)
-        expect(agent).to receive(:send_message).with({:type => "PON", sequence_number: sequence_number + 1})
+        expect(agent).to receive(:send_message).with({:type => "PON"})
         subject.process_message(json_message)
       end
     end
@@ -51,17 +50,17 @@ describe RubyNos::Processor do
 
     context "Discovery message arrives" do
       let(:message){Message.new({type: "DSC"}.merge(basic_message_to_cloud)).serialize}
-      it "it updates the cloud if the user is not on the list and sends a PRS and increments the sequence number" do
+      it "it updates the cloud if the user is not on the list and sends a PRS" do
         expect(list).to receive(:is_on_the_list?).with(another_agent_uuid)
         expect(cloud).to receive(:update).with(cloud_info)
-        expect(agent).to receive(:send_message).with({:type => "PRS", sequence_number: sequence_number + 1})
+        expect(agent).to receive(:send_message).with({:type => "PRS"})
         subject.process_message(json_message)
       end
     end
 
     context "#Presence message arrives" do
       let(:message) {Message.new({type: "PRS", data: {:ap => "example_app"}}.merge(basic_message_to_cloud)).serialize}
-      let(:cloud_info_with_endpoints) {{agent_uuid: another_agent_uuid, sequence_number: sequence_number, info: {:ap => "example_app"}, timestamp: "something"}}
+      let(:cloud_info_with_endpoints) {{agent_uuid: another_agent_uuid, info: {:ap => "example_app"}, timestamp: "something"}}
       it "store the information of the agent and update the list" do
         expect(cloud).to receive(:update).with(cloud_info_with_endpoints)
         subject.process_message(json_message)
@@ -80,7 +79,7 @@ describe RubyNos::Processor do
       let(:message) {Message.new({type: "ENQ"}.merge(basic_message_to_cloud)).serialize}
       it "returns a QNE message" do
         expect(cloud).to receive(:update).with(cloud_info)
-        expect(agent).to receive(:send_message).with({:type => "QNE", sequence_number: sequence_number + 1})
+        expect(agent).to receive(:send_message).with({:type => "QNE"})
         subject.process_message(json_message)
       end
     end
@@ -96,7 +95,7 @@ describe RubyNos::Processor do
       end
 
       it "stores the information of the api in the remote agent" do
-        expect(RemoteAgent).to receive(:new).with(uuid: another_agent_uuid, sequence_number: sequence_number, timestamp: "something", rest_api: an_instance_of(RestApi)).and_return(remote_agent)
+        expect(RemoteAgent).to receive(:new).with(uuid: another_agent_uuid, timestamp: "something", rest_api: an_instance_of(RestApi)).and_return(remote_agent)
         expect(cloud).to receive(:update).with(remote_agent)
         subject.process_message(json_message)
       end
