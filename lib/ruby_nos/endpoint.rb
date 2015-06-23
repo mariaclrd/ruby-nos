@@ -1,14 +1,17 @@
 module RubyNos
   class Endpoint
     include Initializable
+    include Aliasing
+
     attr_accessor :path, :port, :sticky, :type, :priority, :host
     ALLOWED_TYPES = ["PUBLIC", "HEALTHCHECK", "INTERNAL", "MSNOS_HTTP", "UDP", "HTTP", "PUB", "HCK", "INT", "MHT"]
-    alias :pa= :path=
-    alias :po= :port=
-    alias :st= :sticky=
-    alias :ty= :type=
-    alias :xp= :priority=
-    alias :ho= :host=
+
+    attr_alias :pa, :path
+    attr_alias :po, :port
+    attr_alias :st, :sticky
+    attr_alias :ty, :type
+    attr_alias :xp, :priority
+    attr_alias :ho, :host
 
     def type= type
       if ALLOWED_TYPES.include?(type)
