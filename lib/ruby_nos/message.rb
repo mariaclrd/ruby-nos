@@ -30,7 +30,8 @@ module RubyNos
     end
 
     def serialize
-      to_hash.merge!({sg: signature_generator.generate_signature(to_hash.to_s)})
+      message = to_hash
+      message.merge!({sg: signature_generator.generate_signature(message.to_s)})
     end
 
     private

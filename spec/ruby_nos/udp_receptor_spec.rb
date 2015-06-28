@@ -7,7 +7,7 @@ describe RubyNos::UDPReceptor do
   describe "#receive" do
     let(:socket_tx) {UDPSocket.open}
     let(:message)   {"Example message"}
-    let(:host)      {"0.0.0.0"}
+    let(:host)      {"230.31.32.33"}
     let(:port)      {3784}
     let(:processor) {double("processor")}
 

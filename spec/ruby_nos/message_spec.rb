@@ -30,6 +30,11 @@ describe "RubyNos::Message" do
       message.serialize
     end
 
+    it "adds a timestamp to each message" do
+      expect(Formatter).to receive(:timestamp)
+      message.serialize
+    end
+
     context "with all the fields" do
       let(:params) {{:from => "Alice", :to => "Bob", :type => "PRS", :data => {a: "something"}}}
       let(:message) {Message.new(params)}
