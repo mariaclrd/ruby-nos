@@ -33,7 +33,11 @@ module RubyNos
        }
       listen
       join_cloud
-      mantain_cloud
+      maintain_cloud
+    end
+
+    def listen
+      udp_rx.listen(processor)
     end
 
     def send_message args={}
@@ -42,9 +46,7 @@ module RubyNos
       message
     end
 
-    private
-
-    def mantain_cloud
+    def maintain_cloud
       begin
         thread = Thread.new do
           i = 0
@@ -58,7 +60,7 @@ module RubyNos
           end
         end
         thread
-      rescue Exception => e
+      rescue StandardError => e
         RubyNos.logger.send(:info, "Error executing the thread #{e.message}")
       end
     end
@@ -75,6 +77,17 @@ module RubyNos
       send_message({type: 'DSC'})
       send_message({type: 'ENQ'})
     end
+
+    def join_cloud
+      send_message({type: 'PRS'})
+      send_message({type: 'QNE'}) unless rest_api.endpoints.empty?
+    end
+
+    def send_desconnection_message
+      send_message({type: "PRS", data: {present: 0}})
+    end
+
+    private
 
     def last_message_exists?(agent_uuid)
       remote_agent = cloud.list.info_for(agent_uuid)
@@ -101,15 +114,6 @@ module RubyNos
       {present: 1, endpoints: ["UDP,#{udp_rx.socket.connect_address.ip_port},#{udp_rx.socket.connect_address.ip_address}"]}
     end
 
-    def listen
-      udp_rx.listen(processor)
-    end
-
-    def join_cloud
-      send_message({type: 'PRS'})
-      send_message({type: 'QNE'}) unless rest_api.endpoints.empty?
-    end
-
     def formatter
       @formatter ||= Formatter.new
     end
@@ -120,10 +124,6 @@ module RubyNos
       else
         uuid
       end
-    end
-
-    def send_desconnection_message
-      send_message({type: "PRS", data: {present: 0}})
     end
   end
 end

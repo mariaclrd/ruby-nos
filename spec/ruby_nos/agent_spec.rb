@@ -1,73 +1,95 @@
 require "spec_helper"
 
-describe "#RubyNos::Agent" do
-  subject{Agent.new}
-  let(:cloud_uuid) {"00000000-0000-006f-0000-0000000000de"}
-  let(:cloud_uuid_in_message) {"000000000000006f00000000000000de"}
+describe "RubyNos::Agent" do
+  subject{Agent.new(udp_tx: udp_sender, udp_rx: udp_receptor, cloud: cloud, processor: processor, rest_api: rest_api)}
+  let(:udp_receptor)    {double("UDPReceptor", listen: nil)}
+  let(:udp_sender)      {double("UDPSender", send: nil)}
+  let(:cloud)           {double("cloud", uuid: "abcd", list: list)}
+  let(:list)            {double("list", list_of_keys: [])}
+  let(:processor)       {double("processor")}
+  let(:rest_api)        {double("rest_api", endpoints: [], to_hash: {})}
 
-  after(:each) do
-    subject.udp_rx.socket.close
+  describe "mantain cloud" do
+    context "without agents on the cloud" do
+      it "ask for other agents" do
+        expect(udp_sender).to receive(:send).twice
+        thread = subject.maintain_cloud
+        sleep 0.1
+        thread.kill
+      end
+    end
+
+    context "with some agent on the cloud" do
+      let(:list)  {double("list", list_of_keys: [agent.uuid])}
+      let(:agent) {double("agent", uuid: "12345", timestamp: Time.now)}
+
+      before(:each) do
+        allow(list).to receive(:info_for).with(agent.uuid).and_return(agent)
+      end
+
+      context "it exists a previous message of the agent" do
+        it "sends_a_ping_message to the agent" do
+          expect(udp_sender).to receive(:send).exactly(3).times
+          allow(subject).to receive(:last_message_exists?).and_return(true)
+          thread = subject.maintain_cloud
+          sleep 0.1
+          thread.kill
+        end
+      end
+
+      context "it does not exists a previous message of the agent" do
+        it "eliminates the agent from the list" do
+          expect(udp_sender).to receive(:send).twice
+          allow(subject).to receive(:last_message_exists?).and_return(false)
+          expect(list).to receive(:eliminate).with(agent.uuid)
+          thread = subject.maintain_cloud
+          sleep 0.1
+          thread.kill
+        end
+      end
+    end
   end
 
-  describe "#start!" do
-    let(:cloud) {Cloud.new(uuid: cloud_uuid)}
-    let(:list) {double("list")}
-    let(:agent_uuid) {"12345"}
+  describe "#join_cloud" do
+    let(:receptor_info) {{present: 1, endpoints: []}}
 
     before(:each) do
-      subject.cloud = cloud
-      allow_any_instance_of(UDPReceptor).to receive(:listen).and_return(nil)
-      allow_any_instance_of(UDPSender).to receive(:send).and_return(nil)
+      allow(subject).to receive(:receptor_info).and_return(receptor_info)
     end
 
-    it "initialize the UDPReceptor" do
-      expect(subject.udp_rx).to receive(:listen)
-      thread = subject.start!
-      thread.kill
+    it "sends only a presence message if the agent does not have an API with endpoints" do
+      expect(udp_sender).to receive(:send).once
+      subject.join_cloud
     end
 
-    it "joins the cloud" do
-      expect(subject).to receive(:send_message).with({type: "PRS"})
-      thread = subject.start!
-      thread.kill
+    it "sends a presence and a qne if the agent has an API with endpoints" do
+      allow(rest_api).to receive(:endpoints).and_return(["one_endpoint"])
+      expect(udp_sender).to receive(:send).twice
+      subject.join_cloud
     end
-
-    context "#send_connection_messages" do
-
-      it "sends_a_ping_message if there are other agents in the cloud" do
-        cloud.update({agent_uuid: agent_uuid})
-        expect(subject).to receive(:send_message).with({type: "PRS"})
-        expect(subject).to receive(:send_message).with({type: "DSC"})
-        expect(subject).to receive(:send_message).with({type: "ENQ"})
-        expect(subject).to receive(:last_message_exists?).with(agent_uuid).and_return(true)
-        expect(subject).to receive(:send_message).with({type: "PIN", to: "AGT:12345"})
-        thread = subject.start!
-        sleep 0.1
-        thread.kill
-      end
-
-      it "eliminates an agent from the cloud if it has passed a certain amount of time without receiving a new message" do
-        cloud.update({agent_uuid: agent_uuid})
-        expect(subject).to receive(:send_message).with({type: "PRS"})
-        expect(subject).to receive(:send_message).with({type: "DSC"})
-        expect(subject).to receive(:send_message).with({type: "ENQ"})
-        expect(subject).to receive(:last_message_exists?).with(agent_uuid).and_return(false)
-        expect(cloud.list).to receive(:eliminate).with(agent_uuid)
-        thread = subject.start!
-        sleep 0.1
-        thread.kill
-      end
-    end
-
   end
 
+  describe "#send_desconnection_message" do
+    it "sends a message with presence 0" do
+      expect(udp_sender).to receive(:send).once
+      subject.send_desconnection_message
+    end
+  end
+
+
+  describe "#listen" do
+    it "starts the udp receptor" do
+      expect(udp_receptor).to receive(:listen)
+      subject.listen
+    end
+  end
+
+
   describe "#send_message" do
-    let(:cloud) {double("Cloud", :uuid => cloud_uuid)}
     let(:message){double("Message", :serialize => "SerializedMessage")}
-    let(:udp_socket){UDPReceptor.new}
     let(:rest_api) {RestApi.new}
-    let(:endpoint) {Endpoint.new(path: "this_path")}
-    let(:well_formed_presence_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "PRS", timestamp: "sometime", data: {present: 1, endpoints: ["UDP,#{udp_socket.socket.connect_address.ip_port},#{udp_socket.socket.connect_address.ip_address}"]}}).serialize}
+    let(:receptor_info) {{present: 1, endpoints: []}}
+    let(:well_formed_presence_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "PRS", timestamp: "sometime", data: receptor_info}).serialize}
     let(:well_formed_qne_message){Message.new({from: "AGT:#{subject.uuid.gsub("-", "")}", to: "CLD:#{subject.cloud.uuid.gsub("-", "")}", type: "QNE", timestamp: "sometime", data: rest_api.to_hash}).serialize}
     let(:host) {"0.0.0.0"}
     let(:port) {"3784"}
@@ -75,26 +97,23 @@ describe "#RubyNos::Agent" do
     before(:each) do
       subject.cloud = cloud
       subject.rest_api = rest_api
-      allow_any_instance_of(UDPSender).to receive(:send).and_return(nil)
-      allow_any_instance_of(UDPReceptor).to receive(:listen).and_return(nil)
       allow_any_instance_of(Message).to receive(:generate_miliseconds_timestamp).and_return("sometime")
     end
 
     it "sends a message using the UDP Socket" do
       expect(Message).to receive(:new).with({:from => "AGT:#{subject.uuid.gsub("-", "")}", :to => "CLD:#{cloud.uuid.gsub("-", "")}", :type => "DSC"}).and_return(message)
-      expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
+      expect(udp_sender).to receive(:send).with({host: host, port: port, :message => "SerializedMessage"})
       subject.send_message({:type => "DSC", :port => port, :host => host})
     end
 
     it "add the UDP socket info if it is a presence message" do
-      allow(subject).to receive(:udp_rx).and_return(udp_socket)
-      expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => well_formed_presence_message})
+      expect(subject).to receive(:receptor_info).and_return(receptor_info)
+      expect(udp_sender).to receive(:send).with({host: host, port: port, :message => well_formed_presence_message})
       subject.send_message({:type => "PRS", :port => port, :host => host})
     end
 
     it "add the RestAPI info if it is a QNE message" do
-      allow(subject).to receive(:udp_rx).and_return(udp_socket)
-      expect_any_instance_of(UDPSender).to receive(:send).with({host: host, port: port, :message => well_formed_qne_message})
+      expect(udp_sender).to receive(:send).with({host: host, port: port, :message => well_formed_qne_message})
       subject.send_message({:type => "QNE", :port => port, :host => host})
     end
   end
