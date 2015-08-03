@@ -33,7 +33,7 @@ An example of configuration would be:
 To make the agent start sending and listening to messages you will have to add the following line to your code:
 
   ```ruby
-      RubyNos::Agent.new.configure
+      RubyNos::Agent.new.start!
   ```
 
 ###Publish an API

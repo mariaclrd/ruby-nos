@@ -18,7 +18,6 @@ describe RubyNos::UDPSender do
       before(:each) do
         membership = IPAddr.new(host).hton + IPAddr.new(bind_addr).hton
         socketrx.setsockopt(:IPPROTO_IP, :IP_ADD_MEMBERSHIP, membership)
-        socketrx.setsockopt(:SOL_SOCKET, :SO_REUSEPORT, 1)
         socketrx.bind(bind_addr, port)
       end
 

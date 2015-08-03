@@ -5,7 +5,7 @@ describe "#RubyNos::Endpoint" do
 
   describe "type=" do
     it "can does not allow types that are not on the allowed types list" do
-      expect{subject.type = "SOMETHING"}.to raise_error(SyntaxError)
+      expect{subject.type = "SOMETHING"}.to raise_error(ArgumentError)
     end
 
     it "allows to set a type that is on the list" do

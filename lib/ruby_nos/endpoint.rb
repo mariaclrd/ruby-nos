@@ -17,7 +17,7 @@ module RubyNos
       if ALLOWED_TYPES.include?(type)
         @type = type
       else
-        raise SyntaxError
+        raise ArgumentError
       end
     end
 

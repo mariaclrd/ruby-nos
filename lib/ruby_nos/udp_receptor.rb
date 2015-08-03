@@ -22,13 +22,12 @@ module RubyNos
     end
 
     def listen processor
-      thread = Thread.new do
+      Thread.new do
         loop do
           message = @socket.recvfrom(512).first
           processor.process_message(message)
         end
       end
-      thread
     end
 
     private
@@ -37,7 +36,6 @@ module RubyNos
       RubyNos.logger.send(:info, "Binding socket to #{bind_addr} IP")
       membership = IPAddr.new(multicast_address).hton + IPAddr.new(bind_addr).hton
       socket.setsockopt(:IPPROTO_IP, :IP_ADD_MEMBERSHIP, membership)
-      socket.setsockopt(:SOL_SOCKET, :SO_REUSEPORT, 1)
       socket.setsockopt(:SOL_SOCKET, :SO_REUSEADDR, 1)
       socket.bind(bind_addr, port)
     end
