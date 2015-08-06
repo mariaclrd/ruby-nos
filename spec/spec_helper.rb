@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'rspec'
 require 'pry'
+require "codeclimate-test-reporter"
 
 ENV['RACK_ENV'] = 'test'
 
@@ -13,6 +14,7 @@ rescue Bundler::BundlerError => e
 end
 
 $LOAD_PATH << File.join(File.dirname(__FILE__),'..')
+CodeClimate::TestReporter.start if !!ENV['CODECLIMATE_REPO_TOKEN']
 require 'config/environment'
 include RubyNos
 
