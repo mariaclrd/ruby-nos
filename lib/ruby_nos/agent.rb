@@ -66,10 +66,8 @@ module RubyNos
     end
 
     def send_connection_messages
-      unless cloud.list.list_of_keys.empty?
-        cloud.list.list_of_keys.each do |agent_uuid|
-          last_message_exists?(agent_uuid) ?  send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"}) : cloud.list.eliminate(agent_uuid)
-        end
+      cloud.list.list_of_keys.each do |agent_uuid|
+        last_message_exists?(agent_uuid) ?  send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"}) : cloud.list.eliminate(agent_uuid)
       end
     end
 

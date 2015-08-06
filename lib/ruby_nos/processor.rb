@@ -50,13 +50,13 @@ module RubyNos
     end
 
     def received_api
-      api = RestApi.new({name: self.current_message.data[:name]})
-      if self.current_message.data[:apis]
-        self.current_message.data[:apis].each do |endpoint|
-          api.add_endpoint(endpoint)
+      RestApi.new({name: self.current_message.data[:name]}).tap do |api|
+        if self.current_message.data[:apis]
+          self.current_message.data[:apis].each do |endpoint|
+            api.add_endpoint(endpoint)
+          end
         end
       end
-      api
     end
 
     def correct_signature? received_message

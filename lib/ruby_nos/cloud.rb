@@ -6,7 +6,7 @@ module RubyNos
     def uuid
       @uuid ||= RubyNos.cloud_uuid
     end
-    
+
     def list
       @list ||= List.new
     end
@@ -34,11 +34,11 @@ module RubyNos
       agent.endpoints = process_endpoints(info[:endpoints]) if (info && info[:endpoints])
       agent
     end
-      
+
     def timestamp_for_list
       Formatter.timestamp
     end
-    
+
     def update_actual_info
       if correct_timestamp? && !same_info?
         prepare_agent
@@ -69,12 +69,12 @@ module RubyNos
     end
 
     def process_endpoints endpoints
-      endpoints_info = []
-      endpoints.each do |endpoint|
-        e_info = endpoint.split(",")
-        endpoints_info << Endpoint.new({type: e_info[0], port: e_info[1], host: e_info[2]})
+      [].tap do |endpoints_info|
+        endpoints.each do |endpoint|
+          e_info = endpoint.split(",")
+          endpoints_info << Endpoint.new({type: e_info[0], port: e_info[1], host: e_info[2]})
+        end
       end
-      endpoints_info
     end
   end
 end
