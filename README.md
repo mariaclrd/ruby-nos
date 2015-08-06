@@ -1,4 +1,5 @@
 #RubyNos
+[![Build Status](https://travis-ci.org/mariaclrd/ruby-nos.svg?branch=master)](https://travis-ci.org/mariaclrd/ruby-nos)
 
 A gem to provide microservices autodiscovery to Ruby microservices. This gem allows a microservice to publish its
 existence on a cloud, store other microservices information and public its API.
