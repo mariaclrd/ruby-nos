@@ -3,6 +3,8 @@
 [![Code Climate](https://codeclimate.com/github/mariaclrd/ruby-nos/badges/gpa.svg)](https://codeclimate.com/github/mariaclrd/ruby-nos)
 [![Test Coverage](https://codeclimate.com/github/mariaclrd/ruby-nos/badges/coverage.svg)](https://codeclimate.com/github/mariaclrd/ruby-nos/coverage)
 
+Gem is already available in RubyGems: https://rubygems.org/gems/ruby_nos
+
 A gem to provide microservices autodiscovery to Ruby microservices. This gem allows a microservice to publish its
 existence on a cloud, store other microservices information and public its API.
 
