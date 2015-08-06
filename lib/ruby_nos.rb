@@ -1,5 +1,5 @@
 require "ruby_nos/version"
-require 'mini_logger'
+require "logger"
 
 module RubyNos
   autoload :Agent,               "ruby_nos/agent"
@@ -19,7 +19,6 @@ module RubyNos
   autoload :VERSION,             "ruby_nos/version"
 
   class << self
-    include MiniLogger::Loggable
 
     attr_accessor :signature_key, :logger, :port, :cloud_uuid, :group_address, :time_between_messages, :keep_alive_time, :hops
 
