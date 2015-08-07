@@ -62,6 +62,10 @@ You will have to specify the type of the endpoint, there are three types support
  * **PUBLIC(PUB):** If the endpoint belongs to a public API.
  * **INTERNAL(INT):** If the endpoint belongs to an internal API.
  * **HEALTHCHECK(HCK):** For a healthcheck endpoint.
+ 
+## License
+
+Released under the MIT License.  See the [LICENSE](LICENSE.md) file for further details.
 
 
 
