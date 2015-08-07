@@ -1,14 +1,18 @@
-#RubyNos 
-![alt tag](https://avatars3.githubusercontent.com/u/2384872?v=3&s=100)
+#RubyNos ![alt tag](https://avatars3.githubusercontent.com/u/2384872?v=3&s=100)
 [![Build Status](https://travis-ci.org/mariaclrd/ruby-nos.svg?branch=master)](https://travis-ci.org/mariaclrd/ruby-nos)
 [![Code Climate](https://codeclimate.com/github/mariaclrd/ruby-nos/badges/gpa.svg)](https://codeclimate.com/github/mariaclrd/ruby-nos)
 [![Test Coverage](https://codeclimate.com/github/mariaclrd/ruby-nos/badges/coverage.svg)](https://codeclimate.com/github/mariaclrd/ruby-nos/coverage)
 
-Gem is already available in RubyGems: https://rubygems.org/gems/ruby_nos
-
 A gem to provide microservices autodiscovery to Ruby microservices. This gem allows a microservice to publish its
 existence on a cloud, store other microservices information and public its API.
 
+#Installation
+
+Gem is available in RubyGems so you can install it using:
+
+  ```bash
+    gem install ruby-nos
+  ```
 #Configuration
 
 You can configure the following characteristics of the gem:
@@ -67,6 +71,8 @@ You will have to specify the type of the endpoint, there are three types support
 ## License
 
 Released under the MIT License.  See the [LICENSE](LICENSE.md) file for further details.
+
+This project has been powered by Workshare ltd.
 
 
 
