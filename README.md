@@ -72,7 +72,7 @@ You will have to specify the type of the endpoint, there are three types support
 
 Released under the MIT License.  See the [LICENSE](LICENSE.md) file for further details.
 
-This project has been powered by Workshare ltd.
+This project has been powered and developed by Workshare ltd.
 
 
 
