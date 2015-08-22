@@ -28,9 +28,9 @@ module RubyNos
     end
 
     def start!
-       at_exit {
-         send_desconnection_message
-       }
+      at_exit {
+        send_desconnection_message
+      }
       listen
       join_cloud
       maintain_cloud
@@ -49,10 +49,7 @@ module RubyNos
     def maintain_cloud
       begin
         thread = Thread.new do
-          i = 0
           loop do
-            i = i+1
-            RubyNos.logger.send(:info, "Iteration number #{i}")
             RubyNos.logger.send(:info, "Agents on the cloud #{cloud.list.list_of_keys.count}")
             send_discovery_messages
             send_connection_messages
@@ -67,7 +64,7 @@ module RubyNos
 
     def send_connection_messages
       cloud.list.list_of_keys.each do |agent_uuid|
-        last_message_exists?(agent_uuid) ?  send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"}) : cloud.list.eliminate(agent_uuid)
+        last_message_exists?(agent_uuid) ? send_message({to: "AGT:#{uuid_for_message(agent_uuid)}", type: "PIN"}) : cloud.list.eliminate(agent_uuid)
       end
     end
 

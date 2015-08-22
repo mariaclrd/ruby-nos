@@ -20,7 +20,7 @@ module RubyNos
       self.current_message = Message.new(formatted_message)
 
       unless sender_uuid == agent.uuid || !correct_signature?(formatted_message)
-        RubyNos.logger.send(:info, "#{self.current_message.type} arrives")
+        RubyNos.logger.send(:info, "#{formatted_message} arrives")
         if agent_receptor? || cloud_receptor?
           processor = message_processor.fetch(current_message.type, nil)
           processor.call if processor

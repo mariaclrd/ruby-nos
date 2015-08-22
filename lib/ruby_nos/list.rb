@@ -16,6 +16,7 @@ module RubyNos
     end
       
     def eliminate uuid
+      RubyNos.logger.send(:info, "Eliminated agent #{uuid}")
       list.delete_if{|e| e.keys.first == uuid}
     end
 
