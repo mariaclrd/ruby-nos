@@ -11,7 +11,7 @@ existence on a cloud, store other microservices information and public its API.
 Gem is available in RubyGems so you can install it using:
 
   ```bash
-    gem install ruby-nos
+    gem install ruby_nos
   ```
 #Configuration
 
