@@ -1,4 +1,4 @@
-#RubyNos ![alt tag](https://avatars3.githubusercontent.com/u/2384872?v=3&s=80)
+# RubyNos ![alt tag](https://avatars3.githubusercontent.com/u/2384872?v=3&s=80)
 [![Build Status](https://travis-ci.org/mariaclrd/ruby-nos.svg?branch=master)](https://travis-ci.org/mariaclrd/ruby-nos)
 [![Code Climate](https://codeclimate.com/github/mariaclrd/ruby-nos/badges/gpa.svg)](https://codeclimate.com/github/mariaclrd/ruby-nos)
 [![Test Coverage](https://codeclimate.com/github/mariaclrd/ruby-nos/badges/coverage.svg)](https://codeclimate.com/github/mariaclrd/ruby-nos/coverage)
@@ -6,18 +6,18 @@
 A gem to provide microservices autodiscovery to Ruby microservices. This gem allows a microservice to publish its
 existence on a cloud, store other microservices information and public its API.
 
-#Installation
+# Installation
 
 Gem is available in RubyGems so you can install it using:
 
   ```bash
     gem install ruby_nos
   ```
-#Configuration
+# Configuration
 
 You can configure the following characteristics of the gem:
 
-###Agent characteristics
+### Agent characteristics
 
 Every microservice will have an Agent object that will be the responsible of sending the messages to the cloud. You can
 configure these characteristics:
@@ -46,7 +46,7 @@ To make the agent start sending and listening to messages you will have to add t
       RubyNos::Agent.new.start!
   ```
 
-###Publish an API
+### Publish an API
 
 To publish the API of a microservice you will have to create a RestAPI agent and associate it to the Agent.
 
